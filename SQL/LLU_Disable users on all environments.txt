@@ -1,0 +1,43 @@
+-- CPH-SQL04T
+use SUPPORT_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+use SUPPORT2_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+use UAT_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+use UAT3_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+use ZebraTST6_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+
+-- CPH-SQL02t
+use ZebraTST_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+use ZebraTST4_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+use ZebraTST5_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+
+-- CPH-SQL03T
+use ZebraTST3_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+use EGTST_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+use EDU_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'
+
+-- CPH-SQL05T
+use UAT2_AX2012
+update USERINFO set ENABLE = 0 where ID = 'sien.de'
+update USERINFO set ENABLE = 0 where ID = 'ruhe.de'

@@ -1,0 +1,12 @@
+CREATE DATABASE [LLU_Temp]
+ ON  PRIMARY 
+( NAME = N'LLU_Temp', FILENAME = N'E:\Data\LLU_Temp.mdf' , SIZE = 5120KB , FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'LLU_Temp_log', FILENAME = N'F:\Log\LLU_Temp_log.ldf' , SIZE = 1024KB , FILEGROWTH = 10%)
+GO
+
+select * into [LLU_Temp].dbo.batchjob_LLUBackup20170825 from batchjob
+select * into [LLU_Temp].dbo.batch_LLUBackup20170825 from batch
+select * into [LLU_Temp].dbo.batchconstraints_LLUBackup20170825 from batchconstraints
+
+BACKUP DATABASE [LLU_Temp] TO  DISK = N'G:\Backup\LLU_Temp.bak' WITH NOFORMAT, NOINIT,  NAME = N'LLU_Temp-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10

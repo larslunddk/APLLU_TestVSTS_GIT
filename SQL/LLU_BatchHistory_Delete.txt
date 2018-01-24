@@ -1,0 +1,89 @@
+CREATE TABLE #TmpOutput (
+    line int,
+    result nvarchar(255),
+ 
+);
+GO
+DROP PROCEDURE dbo.SaveTableCounts
+GO
+CREATE PROCEDURE dbo.SaveTableCounts
+    @Type nvarchar(10),
+	@RetensionDays int
+AS
+	declare @res as nvarchar(200)
+	declare @FromTime as datetime
+
+	SET @FromTime = GetDate()
+	select @res = count(*) from BATCHCONSTRAINTSHISTORY
+		   where exists (select 1 from BATCHHISTORY, BATCHJOBHISTORY 
+									  where BATCHHISTORY.BATCHJOBHISTORYID = BATCHJOBHISTORY.recid 
+									  and BATCHCONSTRAINTSHISTORY.BATCHID = BATCHHISTORY.RECID 
+									  and BATCHJOBHISTORY.STARTDATETIME < DateAdd(day,-1*@RetensionDays, Getdate()))
+	set @res = CONVERT(NVARCHAR,CONVERT(TIME, GETDATE()))+' / '+Convert(nvarchar,CONVERT(TIME, GETDATE()-@FromTime))+' - BATCHCONSTRAINTSHISTORY '+@Type+' : '+@Res
+	insert #TmpOutput values ((select max(line)+1 from #TmpOutput), @Res)
+
+	--delete from BATCHHISTORY
+	select @Res = COUNT(*) from BATCHHISTORY
+		   where exists (select 1 from BATCHJOBHISTORY 
+									  where BATCHHISTORY.BATCHJOBHISTORYID = BATCHJOBHISTORY.recid 
+									  and BATCHJOBHISTORY.STARTDATETIME < DateAdd(day,-1*@RetensionDays, Getdate()))
+	set @res = CONVERT(NVARCHAR,CONVERT(TIME, GETDATE()))+' / '+Convert(nvarchar,CONVERT(TIME, GETDATE()-@FromTime))+' - BATCHHISTORY '+@Type+' : '+@Res
+	insert #TmpOutput values ((select max(line)+1 from #TmpOutput), @Res)
+
+	--delete from BATCHJOBHISTORY
+	select @Res = COUNT(*) from BATCHJOBHISTORY
+		   where BATCHJOBHISTORY.STARTDATETIME < DateAdd(day,-1*@RetensionDays, Getdate())
+	set @res = CONVERT(NVARCHAR,CONVERT(TIME, GETDATE()))+' / '+Convert(nvarchar,CONVERT(TIME, GETDATE()-@FromTime))+' - BATCHJOBHISTORY '+@Type+' : '+@Res
+	insert #TmpOutput values ((select max(line)+1 from #TmpOutput), @Res)
+
+	RETURN 0 
+GO
+
+exec SaveTableCounts 'Before',0
+
+
+
+begin transaction
+declare @RetensionDays as int
+
+
+set @RetensionDays = 0
+
+--delete from BATCHCONSTRAINTSHISTORY
+
+
+
+set @RetensionDays = 60
+--delete from BATCHCONSTRAINTSHISTORY
+delete from BATCHCONSTRAINTSHISTORY
+       where exists (select 1 from BATCHHISTORY, BATCHJOBHISTORY 
+                                  where BATCHHISTORY.BATCHJOBHISTORYID = BATCHJOBHISTORY.recid 
+                                  and BATCHCONSTRAINTSHISTORY.BATCHID = BATCHHISTORY.RECID 
+                                  and BATCHJOBHISTORY.STARTDATETIME < DateAdd(day,-1*@RetensionDays, Getdate()))
+--delete from BATCHHISTORY
+delete from BATCHHISTORY
+       where exists (select 1 from BATCHJOBHISTORY 
+                                  where BATCHHISTORY.BATCHJOBHISTORYID = BATCHJOBHISTORY.recid 
+                                  and BATCHJOBHISTORY.STARTDATETIME < DateAdd(day,-1*@RetensionDays, Getdate()))
+--delete from BATCHJOBHISTORY
+delete from BATCHJOBHISTORY
+       where BATCHJOBHISTORY.STARTDATETIME < DateAdd(day,-1*@RetensionDays, Getdate())
+
+
+set @RetensionDays = 0
+--delete from BATCHCONSTRAINTSHISTORY
+select 'BATCHCONSTRAINTSHISTORY after', count(*) from BATCHCONSTRAINTSHISTORY
+       where exists (select 1 from BATCHHISTORY, BATCHJOBHISTORY 
+                                  where BATCHHISTORY.BATCHJOBHISTORYID = BATCHJOBHISTORY.recid 
+                                  and BATCHCONSTRAINTSHISTORY.BATCHID = BATCHHISTORY.RECID 
+                                  and BATCHJOBHISTORY.STARTDATETIME < DateAdd(day,-1*@RetensionDays, Getdate()))
+--delete from BATCHHISTORY
+select 'BATCHHISTORY after', COUNT(*) from BATCHHISTORY
+       where exists (select 1 from BATCHJOBHISTORY 
+                                  where BATCHHISTORY.BATCHJOBHISTORYID = BATCHJOBHISTORY.recid 
+                                  and BATCHJOBHISTORY.STARTDATETIME < DateAdd(day,-1*@RetensionDays, Getdate()))
+--delete from BATCHJOBHISTORY
+select 'BATCHJOBHISTORY after', COUNT(*) from BATCHJOBHISTORY
+       where BATCHJOBHISTORY.STARTDATETIME < DateAdd(day,-1*@RetensionDays, Getdate())
+
+ROLLBACK tran;

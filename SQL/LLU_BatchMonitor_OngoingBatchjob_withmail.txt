@@ -1,0 +1,262 @@
+USE [AX2012_PROD]
+GO
+
+
+Declare @BatchJobList table
+(BATCHCAPTION VARCHAR(100), BatchJobStatus VarChar(30), OrigStartDatetime DATETIME, StartDatetime DATETIME, StartTimeThresholdWarning INT, ExecutionTimeThresholdWarning INT, LatestStart DATETIME, LatestEnd DATETIME, ErrorType INT)
+
+Declare @BatchJobListTemp table
+(BATCHCAPTION VARCHAR(100), BatchJobStatus VarChar(30), OrigStartDatetime DATETIME, StartDatetime DATETIME, StartTimeThresholdWarning INT, ExecutionTimeThresholdWarning INT, LatestStart DATETIME, LatestEnd DATETIME, ErrorType INT, ID INT )
+
+Declare @BatchJobListCount INT
+
+Declare @HourOffset int   
+Declare @TimeOffSet INT
+Declare @TimeDifference INT
+
+DECLARE @ID INT
+DECLARE @MAX INT
+Declare @MailDate VARCHAR(50)
+Declare @MailRecipients VARCHAR(200)
+Declare @MailSubject VARCHAR(200)
+Declare @OutPutHTML NVARCHAR(MAX)
+Declare @MailBATCHCAPTION VARCHAR(100)
+Declare @MailBatchJobStatus VarChar(30)
+Declare @MailOrigStartDatetime VARCHAR(120)
+Declare @MailStartDatetime VARCHAR(120)
+Declare @MailStartTimeThresholdWarning VARCHAR(5)
+Declare @MailExecutionTimeThresholdWarning VARCHAR(5)
+Declare @MailLatestStart VARCHAR(120)
+Declare @MailLatestEnd VARCHAR(120)
+
+Declare @ErrorType INT
+Declare @ErrorTypeText VARCHAR(200)
+
+
+/* Automatic Time offset even at Daylight savings */
+Select @HourOffset = DateDiff(hour,GetUTCDate(),GetDate())	-- Variable to get Local Hour Offset against UTC - Number in Hours
+Select @TimeOffSet = @HourOffset * 60						-- Offset time differnece between UTC and Local time (Dynamics AX use UTC internaly)
+
+/* Date and Time for Mail */
+Select @MailDate = convert(varchar, getdate(), 120)
+
+/* Mail Subject */
+Select @MailSubject='Dynamics AX Batch Job Error and Warning - Server: '+@@SERVERNAME +' Date: ' +@MailDate
+SET @OutPutHTML = ''
+
+/* Settings for this Script */
+Set @TimeDifference = 5 -- Time between Execution Time windows to look for fail Batch Jobs Need to bee changed if Execution time changes.
+
+
+/* Mail Recipients Address */
+SET @MailRecipients = 'llu@alfapeople.com'
+
+
+
+--####################### Jobs started late WARNING - Must be executed every 5 min
+--## Baseline is BATCHJOB.ORIGSTARTDATETIME + 120
+Insert @BatchJobList (BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, LatestStart, ErrorType)
+select top 100 batchjob.caption, dbo.enum2str('batchstatus', batchjob.status), BATCHJOB.ORIGSTARTDATETIME, BATCHJOB.STARTDATETIME, EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING,
+Dateadd(minute, EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING,BATCHJOB.ORIGSTARTDATETIME)+@TimeOffSet, 1
+from batchjob
+join EGBCBATCHJOB
+on EGBCBATCHJOB.BATCHJOB = BATCHJOB.RECID
+where batchjob.status = 1
+and EGBCBATCHJOB.STARTTIMETHRESHOLDERROR<>0
+and getdate()> Dateadd(minute, EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING+@TimeOffSet,BATCHJOB.ORIGSTARTDATETIME)
+and getdate()< Dateadd(minute, EGBCBATCHJOB.STARTTIMETHRESHOLDERROR+@TimeOffSet,BATCHJOB.ORIGSTARTDATETIME)
+
+
+--####################### Jobs started late ERROR - Must be executed every 5 min
+--## Baseline is BATCHJOB.ORIGSTARTDATETIME + 120
+--## If job exeeding Error treshold value the error is ONLY send once
+Insert @BatchJobList (BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, LatestStart, ErrorType)
+select top 100 batchjob.caption, dbo.enum2str('batchstatus', batchjob.status),BATCHJOB.ORIGSTARTDATETIME, BATCHJOB.STARTDATETIME, EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING,
+Dateadd(minute, EGBCBATCHJOB.STARTTIMETHRESHOLDERROR,BATCHJOB.ORIGSTARTDATETIME)+@TimeOffSet, 2
+from batchjob
+join EGBCBATCHJOB
+on EGBCBATCHJOB.BATCHJOB = BATCHJOB.RECID
+where batchjob.status = 1
+and EGBCBATCHJOB.STARTTIMETHRESHOLDERROR<>0
+and getdate()> Dateadd(minute, EGBCBATCHJOB.STARTTIMETHRESHOLDERROR+@TimeOffSet,BATCHJOB.ORIGSTARTDATETIME)
+and getdate()< Dateadd(minute, EGBCBATCHJOB.STARTTIMETHRESHOLDERROR+@TimeOffSet+@TimeDifference,BATCHJOB.ORIGSTARTDATETIME)
+
+
+       
+--####################### Jobs started late WARNING - Must be executed every 5 min
+--## Baseline is BATCHJOB.STARTDATETIME + 120
+Insert @BatchJobList (BATCHCAPTION, BatchJobStatus, StartDatetime, ExecutionTimeThresholdWarning, LatestEnd, ErrorType)
+select top 100 batchjob.caption, dbo.enum2str('batchstatus', batchjob.status), BATCHJOB.STARTDATETIME, EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING,
+Dateadd(minute, EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING,BATCHJOB.STARTDATETIME)+@TimeOffSet,3
+from batchjob
+join EGBCBATCHJOB
+on EGBCBATCHJOB.BATCHJOB = BATCHJOB.RECID
+where batchjob.status = 2
+and EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR<>0
+and getdate()> Dateadd(minute, EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING+@TimeOffSet,BATCHJOB.STARTDATETIME)
+and getdate()< Dateadd(minute, EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR+@TimeOffSet,BATCHJOB.STARTDATETIME)
+ 
+
+       
+--####################### Jobs started late ERROR - Must be executed every 5 min
+--## Baseline is BATCHJOB.STARTDATETIME + 120
+--## If job exeeding Error treshold value the error is ONLY send once
+Insert @BatchJobList (BATCHCAPTION, BatchJobStatus, StartDatetime, ExecutionTimeThresholdWarning, LatestEnd, ErrorType)
+select top 100 batchjob.caption, dbo.enum2str('batchstatus', batchjob.status), BATCHJOB.STARTDATETIME, EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING,
+Dateadd(minute, EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR,BATCHJOB.STARTDATETIME)+@TimeOffSet, 4
+from batchjob
+join EGBCBATCHJOB
+on EGBCBATCHJOB.BATCHJOB = BATCHJOB.RECID
+where batchjob.status = 2
+and EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR<>0
+and getdate()> Dateadd(minute, EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR+@TimeOffSet,BATCHJOB.STARTDATETIME)
+and getdate()< Dateadd(minute, EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR+@TimeOffSet+@TimeDifference,BATCHJOB.STARTDATETIME)
+ 
+
+Select @BatchJobListCount = Count(BATCHCAPTION) from @BatchJobList
+
+IF @BatchJobListCount > 0
+BEGIN
+  --SET @OutPutHTML = '<br>'
+  IF EXISTS (Select 1 from @BatchJobList where ErrorType = 1)
+   BEGIN
+   SET @ErrorType = 1
+   SET @OutPutHTML = @OutPutHTML + '<b>Jobs started late WARNING</b><br>'
+
+   Delete from @BatchJobListTemp;
+   
+   INSERT @BatchJobListTemp
+   SELECT BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, ExecutionTimeThresholdWarning, LatestStart, LatestEnd, ErrorType, ROW_NUMBER() OVER(ORDER BY  COUNT(*) DESC) AS  ID
+   FROM @BatchJobList Where ErrorType = @ErrorType
+   GROUP BY BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, ExecutionTimeThresholdWarning, LatestStart, LatestEnd, ErrorType
+   ORDER BY  COUNT(*) DESC
+
+   SET @OutPutHTML = @OutPutHTML + '<body><table><tr><table border="1"><td>Batch Caption</td><td>Batch Job Status</td><td>Original Start Datetime</td><td>Start Datetime</td><td>Start Time Threshold Warning</td><td>Latest Start</td></tr>'
+
+   SELECT @MAX = MAX(ID) FROM @BatchJobListTemp
+
+   SET @ID=1
+    WHILE @ID <= @MAX
+      BEGIN
+		SELECT @MailBATCHCAPTION = BATCHCAPTION FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailBatchJobStatus = BatchJobStatus FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailOrigStartDatetime = convert(varchar,OrigStartDatetime,120) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailStartDatetime = convert(varchar,StartDatetime,120) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailStartTimeThresholdWarning = convert(varchar,StartTimeThresholdWarning,5) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailLatestStart = convert(varchar,LatestStart,120) FROM @BatchJobListTemp WHERE @ID = ID
+
+		SET @OutPutHTML = @OutPutHTML + '<tr><td>'+@MailBATCHCAPTION+'<td>'+@MailBatchJobStatus+'</td><td>'+@MailOrigStartDatetime+'</td><td>'+@MailStartDatetime+'</td><td>'+@MailStartTimeThresholdWarning+'</td><td>'+@MailLatestStart+'</td></tr>'
+		SET	@ID = @ID + 1
+      END
+
+	SET @OutPutHTML = @OutPutHTML + '</table></body><br>'
+   END
+   
+  IF EXISTS (Select 1 from @BatchJobList where ErrorType = 2)
+   BEGIN
+   SET @ErrorType = 2
+   SET @OutPutHTML = @OutPutHTML + '<b>Jobs started late ERROR</b><br>'
+
+   Delete from @BatchJobListTemp;
+
+   INSERT @BatchJobListTemp
+   SELECT BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, ExecutionTimeThresholdWarning, LatestStart, LatestEnd, ErrorType, ROW_NUMBER() OVER(ORDER BY  COUNT(*) DESC) AS  ID
+   FROM @BatchJobList Where ErrorType = @ErrorType
+   GROUP BY BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, ExecutionTimeThresholdWarning, LatestStart, LatestEnd, ErrorType
+   ORDER BY  COUNT(*) DESC
+
+   SET @OutPutHTML = @OutPutHTML + '<body><table><tr><table border="1"><td>Batch Caption</td><td>Batch Job Status</td><td>Original Start Datetime</td><td>Start Datetime</td><td>Start Time Threshold Warning</td><td>Latest Start</td></tr>'
+
+ 
+
+   SELECT @MAX = MAX(ID) FROM @BatchJobListTemp
+
+   SET @ID=1
+    WHILE @ID <= @MAX
+      BEGIN
+		SELECT @MailBATCHCAPTION = BATCHCAPTION FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailBatchJobStatus = BatchJobStatus FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailOrigStartDatetime = convert(varchar,OrigStartDatetime,120) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailStartDatetime = convert(varchar,StartDatetime,120) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailStartTimeThresholdWarning = convert(varchar,StartTimeThresholdWarning,5) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailLatestStart = convert(varchar,LatestStart,120) FROM @BatchJobListTemp WHERE @ID = ID
+
+		SET @OutPutHTML = @OutPutHTML + '<tr><td>'+@MailBATCHCAPTION+'<td>'+@MailBatchJobStatus+'</td><td>'+@MailOrigStartDatetime+'</td><td>'+@MailStartDatetime+'</td><td>'+@MailStartTimeThresholdWarning+'</td><td>'+@MailLatestStart+'</td></tr>'
+		SET	@ID = @ID + 1
+      END
+
+	SET @OutPutHTML = @OutPutHTML + '</table></body><br>'
+   END
+
+  IF EXISTS (Select 1 from @BatchJobList where ErrorType = 3)
+   BEGIN
+   SET @ErrorType = 3
+   SET @OutPutHTML = @OutPutHTML + '<b>Jobs started late WARNING</b><br>'
+   
+   Delete from @BatchJobListTemp;
+
+   INSERT @BatchJobListTemp
+   SELECT BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, ExecutionTimeThresholdWarning, LatestStart, LatestEnd, ErrorType, ROW_NUMBER() OVER(ORDER BY  COUNT(*) DESC) AS  ID
+   FROM @BatchJobList Where ErrorType = @ErrorType
+   GROUP BY BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, ExecutionTimeThresholdWarning, LatestStart, LatestEnd, ErrorType
+   ORDER BY  COUNT(*) DESC
+
+   SET @OutPutHTML = @OutPutHTML + '<body><table><tr><table border="1"><td>Batch Caption</td><td>Batch Job Status</td><td>Start Datetime</td><td>Execution Time Threshold Warning</td><td>Latest End</td></tr>'
+
+   SELECT @MAX = MAX(ID) FROM @BatchJobListTemp
+
+   SET @ID=1
+    WHILE @ID <= @MAX
+      BEGIN
+		SELECT @MailBATCHCAPTION = BATCHCAPTION FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailBatchJobStatus = BatchJobStatus FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailStartDatetime = convert(varchar,StartDatetime,120) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailExecutionTimeThresholdWarning = convert(varchar,ExecutionTimeThresholdWarning,5) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailLatestEnd = convert(varchar,LatestEnd,120) FROM @BatchJobListTemp WHERE @ID = ID
+
+		SET @OutPutHTML = @OutPutHTML + '<tr><td>'+@MailBATCHCAPTION+'<td>'+@MailBatchJobStatus+'</td><td>'+@MailStartDatetime+'</td><td>'+@MailExecutionTimeThresholdWarning+'</td><td>'+@MailLatestEnd+'</td></tr>'
+		SET	@ID = @ID + 1
+      END
+
+	SET @OutPutHTML = @OutPutHTML + '</table></body><br>'
+   END
+
+  IF EXISTS (Select 1 from @BatchJobList where ErrorType = 4)
+   BEGIN
+   SET @ErrorType = 4
+   SET @OutPutHTML = @OutPutHTML + '<b>Jobs started late ERROR</b><br>'
+
+   Delete from @BatchJobListTemp;
+
+   INSERT @BatchJobListTemp
+   SELECT BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, ExecutionTimeThresholdWarning, LatestStart, LatestEnd, ErrorType, ROW_NUMBER() OVER(ORDER BY  COUNT(*) DESC) AS  ID
+   FROM @BatchJobList Where ErrorType = @ErrorType
+   GROUP BY BATCHCAPTION, BatchJobStatus, OrigStartDatetime, StartDatetime, StartTimeThresholdWarning, ExecutionTimeThresholdWarning, LatestStart, LatestEnd, ErrorType
+   ORDER BY  COUNT(*) DESC
+
+     SET @OutPutHTML = @OutPutHTML + '<body><table><tr><table border="1"><td>Batch Caption</td><td>Batch Job Status</td><td>Start Datetime</td><td>Execution Time Threshold Warning</td><td>Latest End</td></tr>'
+
+   SELECT @MAX = MAX(ID) FROM @BatchJobListTemp
+
+   SET @ID=1
+    WHILE @ID <= @MAX
+      BEGIN
+		SELECT @MailBATCHCAPTION = BATCHCAPTION FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailBatchJobStatus = BatchJobStatus FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailStartDatetime = convert(varchar,StartDatetime,120) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailExecutionTimeThresholdWarning = convert(varchar,ExecutionTimeThresholdWarning,5) FROM @BatchJobListTemp WHERE @ID = ID
+		SELECT @MailLatestEnd = convert(varchar,LatestEnd,120) FROM @BatchJobListTemp WHERE @ID = ID
+
+		SET @OutPutHTML = @OutPutHTML + '<tr><td>'+@MailBATCHCAPTION+'<td>'+@MailBatchJobStatus+'</td><td>'+@MailStartDatetime+'</td><td>'+@MailExecutionTimeThresholdWarning+'</td><td>'+@MailLatestEnd+'</td></tr>'
+		SET	@ID = @ID + 1
+      END
+
+	SET @OutPutHTML = @OutPutHTML + '</table></body><br>'
+   END
+ 
+ EXEC msdb..sp_send_dbmail @recipients = @MailRecipients,
+ @subject = @MailSubject,
+ @body = @OutPutHTML,  
+ @body_format = 'HTML' ; 
+
+END

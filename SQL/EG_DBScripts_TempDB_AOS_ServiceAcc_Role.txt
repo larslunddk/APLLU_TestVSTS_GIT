@@ -1,0 +1,95 @@
+-- 	TEMPDB Status
+select getdate() AS runtime, SUM (user_object_reserved_page_count)*1.0/128 as usr_obj_Mb,
+SUM (internal_object_reserved_page_count)*1.0/128 as internal_obj_Mb,
+SUM (version_store_reserved_page_count)*1.0/128  as version_store_Mb,
+SUM (unallocated_extent_page_count)*1.0/128 as freespace_Mb,
+SUM (mixed_extent_page_count)*1.0/128 as mixedextent_Mb
+FROM sys.dm_db_file_space_usage
+
+-- TEMPB Sessions
+SELECT db_name(spu.database_id) as database_name,
+       at.transaction_begin_time as begin_time,
+               ast.session_id,
+			   ses.host_name,
+       case 
+         when at.transaction_state in (0,1) then 'init'
+         when at.transaction_state = 2 then 'active'
+         when at.transaction_state = 3 then 'ended'
+         when at.transaction_state = 4 then 'committing'
+         when at.transaction_state = 6 then 'comitted'
+         when at.transaction_state = 7 then 'rolling back'
+         when at.transaction_state = 6 then 'rolled back'
+         else 'other'
+       end as transaction_state,
+       ast.elapsed_time_seconds as elapsed_seconds,
+	   ast.elapsed_time_seconds/60 as elapsed_minutes,
+	   ast.elapsed_time_seconds/60/60 as elapsed_hours,
+       ses.program_name, 
+       ses.row_count,
+       (spu.user_objects_alloc_page_count * 1.0/128) AS user_objects_Mb,
+       (spu.user_objects_dealloc_page_count * 1.0/128) AS user_objects_deallocated_Mb,
+       (spu.internal_objects_alloc_page_count * 1.0/128) AS internal_objects_Mb,
+       (spu.internal_objects_dealloc_page_count * 1.0/128) AS internal_objects_deallocated_Mb
+FROM sys.dm_tran_active_snapshot_database_transactions ast
+  JOIN sys.dm_tran_active_transactions at on at.transaction_id = ast.transaction_id
+  JOIN sys.dm_exec_sessions ses ON ses.session_id = ast.session_id
+  JOIN sys.dm_db_session_space_usage spu ON spu.session_id = ses.session_id
+ORDER BY elapsed_time_seconds DESC
+
+-- Add AOSService account DB role if not exist
+-- EG FLHAU 161024
+IF NOT EXISTS (
+	SELECT name from sys.database_principals
+	WHERE name = 'ZEBRA\SA_P_AOSService'
+)
+BEGIN
+	CREATE USER [ZEBRA\SA_P_AOSService] FOR LOGIN [ZEBRA\SA_P_AOSService];
+END;
+
+IF NOT EXISTS (
+	SELECT
+		rp.name AS database_role
+		,mp.name AS database_user
+	FROM sys.database_role_members AS drm
+	INNER JOIN sys.database_principals AS rp
+		ON (rp.principal_id = drm.role_principal_id)
+	INNER JOIN sys.database_principals AS mp
+		ON (mp.principal_id = drm.member_principal_id)
+	WHERE (rp.name = 'db_datareader')
+		AND (mp.name = 'Zebra\SA_P_AOSService')
+)
+BEGIN
+	ALTER ROLE db_datareader ADD MEMBER [ZEBRA\SA_P_AOSService];
+END;
+
+IF NOT EXISTS (
+	SELECT
+		rp.name AS database_role
+		,mp.name AS database_user
+	FROM sys.database_role_members AS drm
+	INNER JOIN sys.database_principals AS rp
+		ON (rp.principal_id = drm.role_principal_id)
+	INNER JOIN sys.database_principals AS mp
+		ON (mp.principal_id = drm.member_principal_id)
+	WHERE (rp.name = 'db_datawriter')
+		AND (mp.name = 'Zebra\SA_P_AOSService')
+)
+BEGIN
+	ALTER ROLE db_datawriter ADD MEMBER [ZEBRA\SA_P_AOSService];
+END;
+
+IF NOT EXISTS (
+	SELECT
+		rp.name AS database_role
+		,mp.name AS database_user
+	FROM sys.database_role_members AS drm
+	INNER JOIN sys.database_principals AS rp
+		ON (rp.principal_id = drm.role_principal_id)
+	INNER JOIN sys.database_principals AS mp
+		ON (mp.principal_id = drm.member_principal_id)
+	WHERE (rp.name = 'db_ddladmin')
+		AND (mp.name = 'Zebra\SA_P_AOSService')
+)
+BEGIN
+	ALTER ROLE db_ddladmin ADD MEMBER [ZEBRA\SA_P_AOSService];
+END;

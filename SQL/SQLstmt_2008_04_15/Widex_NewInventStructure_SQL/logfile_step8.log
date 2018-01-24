@@ -1,0 +1,11 @@
+Changed database context to 'widsql3_cit_1'.
+                                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------
+Apr 14 2008  4:10PM             Step8 p†begyndt                                                                                    
+DbId   FileId      CurrentSize MinimumSize UsedPages   EstimatedPages
+------ ----------- ----------- ----------- ----------- --------------
+     8           2      143929      143929      143928         143928
+DBCC execution completed. If DBCC printed error messages, contact your system administrator.
+                                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------
+Apr 14 2008  4:10PM             Step8 afsluttet                                                                                    

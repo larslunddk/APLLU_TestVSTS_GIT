@@ -1,0 +1,17 @@
+select 
+ CostPrice,
+CURRENCYCODE,
+CUSTACCOUNT,
+ItemId,
+LineAmount,
+Name,
+PriceUnit,
+QtyOrdered,
+RECEIPTDATECONFIRMED,
+RECEIPTDATEREQUESTED,
+SalesPrice,
+SalesQty,
+CreatedDateTime
+ from salesline where dataareaid = 'ZEAS'
+ and CREATEDDATETIME>='20170101'
+ and CREATEDDATETIME<'20170201'

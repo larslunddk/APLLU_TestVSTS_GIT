@@ -1,0 +1,10 @@
+select Caption, serverid, 
+	(select caption from batchjob where batchjob.recid = Batchhistory.BATCHJOBID) as BatchCaption,
+	1 as cnt, 
+		format(dateadd(hour,2,STARTDATETIME),'yyyyMMdd HHmm') as StartHM,
+			--datepart(hour, dateadd(hour,2,STARTDATETIME)) thehour,
+		avg(DATEDIFF(MILLISECOND, STARTDATETIME, ENDDATETIME) / 1000) as [execTime (Sec)] --ENDDATETIME-STARTDATETIME as execTime
+	
+	 from BATCHHISTORY
+	 where Startdatetime > dateadd(hour,2,'20170331')
+	 group by caption, serverid, format(dateadd(hour,2,STARTDATETIME),'yyyyMMdd HHmm'), BATCHJOBID --format(getdate(),'yyyyMMdd HHmm')

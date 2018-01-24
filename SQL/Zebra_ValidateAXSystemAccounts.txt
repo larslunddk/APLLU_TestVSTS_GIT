@@ -1,0 +1,11 @@
+select 'SysBCProxyUserAccount','[SUPPORT_AX2012]',networkalias from [SUPPORT_AX2012].dbo.SysBCProxyUserAccount
+union all select 'SysBCProxyUserAccount','[SUPPORT2_AX2012]',networkalias from [SUPPORT2_AX2012].dbo.SysBCProxyUserAccount
+union all select 'SysBCProxyUserAccount','[UAT_AX2012]',networkalias from [UAT_AX2012].dbo.SysBCProxyUserAccount
+--union all select 'SysBCProxyUserAccount','[UAT2_AX2012]',networkalias from [UAT2_AX2012].dbo.SysBCProxyUserAccount
+union all select 'SysBCProxyUserAccount','[UAT3_AX2012]',networkalias from [UAT3_AX2012].dbo.SysBCProxyUserAccount
+union all select 'SysBCProxyUserAccount','[ZebraTST6_AX2012]',networkalias from [ZebraTST6_AX2012].dbo.SysBCProxyUserAccount
+
+select 'SysBCProxyUserAccount','[STAGE_AX2012]',networkalias from [STAGE_AX2012].dbo.SysBCProxyUserAccount
+union all select 'SysBCProxyUserAccount','[ZebraTST_AX2012]',networkalias from [ZebraTST_AX2012].dbo.SysBCProxyUserAccount
+union all select 'SysBCProxyUserAccount','[ZebraTST4_AX2012]',networkalias from [ZebraTST4_AX2012].dbo.SysBCProxyUserAccount
+union all select 'SysBCProxyUserAccount','[ZebraTST5_AX2012]',networkalias from [ZebraTST5_AX2012].dbo.SysBCProxyUserAccount

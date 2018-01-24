@@ -1,0 +1,2 @@
+When running 1040 jobs - updating items in stores - we need the SQL Traceflag 9481
+When running trial balance and other finance related operations - we need the SQL Traceflag 9481 SWITCHED OFF

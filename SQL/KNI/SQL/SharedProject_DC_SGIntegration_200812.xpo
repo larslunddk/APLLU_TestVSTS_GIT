@@ -1,0 +1,2202 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: CLS
+
+; Microsoft Dynamics Class: DC_PurchConsolidateBatch udlæst
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #DC_PurchConsolidateBatch
+    PROPERTIES
+      Name                #DC_PurchConsolidateBatch
+      Extends             #RunBaseBatch
+      RunOn               #Called from
+    ENDPROPERTIES
+    
+    METHODS
+      Version: 3
+      SOURCE #canGoBatchJournal
+        #public boolean canGoBatchJournal()
+        #{
+        #    return true;
+        #}
+      ENDSOURCE
+      SOURCE #classDeclaration
+        #class DC_PurchConsolidateBatch extends RunBaseBatch
+        #{
+        #    int     TotalPurchProposalUpd;
+        #    int     TotalPurchProposalIns;
+        #    int     TotalPurchUpd;
+        #    int     TotalPurchIns;
+        #    int     TotalPurchTableIns;
+        #    int     ErrItemsBlocked;
+        #    int     ErrItemsOverMax;
+        #    int     ErrItemUnderMin;
+        #    int     ErrUbehandledeIndkForslag;
+        #
+        #
+        #    Str 10  LogID;
+        #
+        #  // Packed variables
+        #    Boolean Test;
+        #
+        #  // Dialog fields
+        #    DialogField DlgTest;
+        #
+        #    #define.CurrentVersion(1)
+        #    #define.Version1(1)
+        #    #localmacro.CurrentList
+        #        Test
+        #    #endmacro
+        #
+        #}
+        #
+      ENDSOURCE
+      SOURCE #Consolidate2IOFConsolidated
+        #int64 Consolidate2IOFConsolidated()
+        #{
+        #    DC_PurchProposalLine    DC_PurchProposalLine,DC_PurchProposalLine2,DC_PurchProposalLineMain, DC_PurchProposalLine_NotMain, DC_PurchProposalLineNotApproved;
+        #    RecordSortedList        RSL_DC_PurchProposalLine = new RecordSortedList(Tablenum(DC_PurchProposalLine));
+        #//    InventDim               InventDim,InventDimTmp,InventDimTmp2;
+        #    InventTable             InventTable,InventTableTmp,InventTableTmp2;
+        #    InventTableModule       InventTableModule,InventTableModuleTmp,InventTableModuleTmp2;
+        #    int64                     Cnt;
+        #    Timer                   Timer = new Timer();
+        #    Boolean                 ShowTimer = false;
+        #    Str                     ErrTxt;
+        #    RCMSupFOOrders          RCMSupFOOrders;
+        #
+        #    ;
+        #    ttsbegin;
+        #    Timer.start(1);
+        #
+        #    while select DC_PurchProposalLine
+        #        where DC_PurchProposalLine.PurchProposalStatus <= DC_PurchProposalStatus::Processed
+        #        &&    DC_PurchProposalLine.ConnectionId != ''
+        #        &&    DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.Approved == True
+        #//TODO: Oprydning
+        #//        join InventDim
+        #//            where InventDim.inventDimId == DC_PurchProposalLine.InventDimId
+        #        notexists join InventTableModuleTmp
+        #            where InventTableModuleTmp.ItemId          == DC_PurchProposalLine.ItemId
+        #            &&    InventTableModuleTmp.ModuleType      == ModuleInventPurchSales::Purch
+        #            &&    (InventTableModuleTmp.HighestQty == 0 || InventTableModuleTmp.HighestQty >= DC_PurchProposalLine.Qty)
+        #            &&    InventTableModuleTmp.Blocked         == False
+        #    {
+        #        select InventTableModuleTmp2
+        #            where InventTableModuleTmp2.ItemId          == DC_PurchProposalLine.ItemId
+        #            &&    InventTableModuleTmp2.ModuleType      == ModuleInventPurchSales::Purch;
+        #        if (InventTableModuleTmp2.HighestQty != 0 && InventTableModuleTmp2.HighestQty < DC_PurchProposalLine.Qty)
+        #        {
+        #            ErrTxt = 'Indk.forslag antal er over varens max-bestilling (Indk.forslagsnr %1 - Varenr. %2, forbindelse %3, Lagersted %4) og er ikke medtaget i konsolideringen';
+        #            ErrItemsOverMax++;
+        #        }
+        #        if (InventTableModuleTmp2.Blocked)
+        #        {
+        #            ErrTxt = 'Indk.forslag - varen er blokeret (Indk.forslagsnr %1 - Varenr. %2, forbindelse %3, Lagersted %4) og er ikke medtaget i konsolideringen';
+        #            ErrItemsBlocked++;
+        #        }
+        #        ErrTxt = StrFmt(ErrTxt, DC_PurchProposalLine.PurchProposalId,DC_PurchProposalLine.ItemId,DC_PurchProposalLine.ConnectionId,DC_PurchProposalLine.InventLocationId);
+        #        //Warning(ErrTxt);
+        #        DC_PurchConsolidateLog::Writelog(ErrTxt,LogID,SysInfologLevel::Warning,'PurchConsolidate');
+        #    }
+        #    Timer.stop(1);
+        #    this.ValidateWithdrawDate();
+        #    Timer.start(2);
+        #    select count(recid) from DC_PurchProposalLine
+        #        where DC_PurchProposalLine.PurchProposalStatus <= DC_PurchProposalStatus::Processed
+        #        &&    DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.Approved == True
+        #        exists join InventTableModuleTmp
+        #            where InventTableModuleTmp.ItemId          == DC_PurchProposalLine.ItemId
+        #            &&    InventTableModuleTmp.ModuleType      == ModuleInventPurchSales::Purch
+        #            &&    (InventTableModuleTmp.HighestQty == 0 || InventTableModuleTmp.HighestQty >= DC_PurchProposalLine.Qty)
+        #            &&    InventTableModuleTmp.Blocked         == False
+        #//TODO: Oprydning
+        #//        exists join InventDimTmp
+        #//            where InventDimTmp.inventDimId == DC_PurchProposalLine.InventDimId
+        #//            &&    InventDimTmp.InventLocationId != ''
+        #        exists join InventTable
+        #            where InventTable.ItemId          == DC_PurchProposalLine.ItemId
+        #            &&    InventTable.DC_WithdrawDate > systemdateget();
+        #
+        #    Cnt = DC_PurchProposalLine.RecId;
+        #    Timer.stop(2);
+        #    Timer.start(3);
+        #
+        #
+        #    DC_PurchProposalLine = null;
+        #    InventTableModuleTmp = null;
+        #//    InventDimTmp         = null;
+        #    InventTable          = null;
+        #
+        #    while select sum(Qty) from DC_PurchProposalLine group by ConnectionId, itemid, /*InventDimID,*/ InventLocationId
+        #        where DC_PurchProposalLine.PurchProposalStatus <= DC_PurchProposalStatus::Processed
+        #        &&    DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.Approved == True
+        #        &&    DC_PurchProposalLine.ConnectionId != ''
+        #        exists join InventTableModuleTmp
+        #            where InventTableModuleTmp.ItemId          == DC_PurchProposalLine.ItemId
+        #            &&    InventTableModuleTmp.ModuleType      == ModuleInventPurchSales::Purch
+        #            &&    (InventTableModuleTmp.HighestQty == 0 || InventTableModuleTmp.HighestQty >= DC_PurchProposalLine.Qty)
+        #            &&    InventTableModuleTmp.Blocked         == False
+        #//TODO: Oprydning
+        #//        exists join InventDimTmp
+        #//            where InventDimTmp.inventDimId == DC_PurchProposalLine.InventDimId
+        #//            &&    InventDimTmp.InventLocationId != ''
+        #        exists join InventTableTmp
+        #            where InventTableTmp.ItemId          == DC_PurchProposalLine.ItemId
+        #            &&    (InventTableTmp.DC_WithdrawDate == datenull() || InventTableTmp.DC_WithdrawDate > systemdateget())
+        #    {
+        #//TODO: Oprydning
+        #        //InventDim = InventDim::find(DC_PurchProposalLine.InventDimId);
+        #
+        #        select firstonly forupdate DC_PurchProposalLineMain
+        #            where DC_PurchProposalLineMain.ItemId       == DC_PurchProposalLine.ItemId
+        #            &&    DC_PurchProposalLineMain.ConnectionId == DC_PurchProposalLine.ConnectionId
+        #            &&    DC_PurchProposalLineMain.InventLocationId    == DC_PurchProposalLine.InventLocationId
+        #            &&    DC_PurchProposalLineMain.PurchProposalStatus == DC_PurchProposalStatus::Consolidated
+        #            &&    DC_PurchProposalLineMain.Locked       == False;
+        #        select UnitID,Blocked from InventTableModule
+        #            where InventTableModule.itemid == DC_PurchProposalLine.ItemId
+        #            &&    InventTableModule.ModuleType == ModuleInventPurchSales::Purch
+        #            join PrimaryVendorId from InventTable
+        #                where InventTable.ItemId == InventTableModule.ItemId;
+        #        if (DC_PurchProposalLineMain.RecId == 0)
+        #        {
+        #            Timer.start(31);
+        #            DC_PurchProposalLineMain.clear();
+        #            DC_PurchProposalLineMain.PurchProposalId    = NumberSeq::newGetNum(PurchParameters::numRefDC_PurchProposalId()).num();
+        #            DC_PurchProposalLineMain.ItemId             = DC_PurchProposalLine.ItemId;
+        #            DC_PurchProposalLineMain.VendAccount        = InventTable.PrimaryVendorId;
+        #            DC_PurchProposalLineMain.UnitID             = InventTableModule.UnitId;
+        #            DC_PurchProposalLineMain.InventLocationId   = DC_PurchProposalLine.InventLocationId;
+        #            DC_PurchProposalLineMain.InventDimId        = DC_PurchProposalLine.inventDimId;
+        #            DC_PurchProposalLineMain.ConnectionId       = DC_PurchProposalLine.ConnectionId;
+        #            DC_PurchProposalLineMain.EmplId             = EmplTable::userId2EmplId(CurUserId());
+        #            DC_PurchProposalLineMain.Qty                = DC_PurchProposalLine.Qty;
+        #            DC_PurchProposalLineMain.PurchProposalStatus= DC_PurchProposalStatus::Consolidated;
+        #            DC_PurchProposalLineMain.InitfromItem(true);
+        #
+        #            Timer.stop(31);
+        #            Timer.start(32);
+        #            DC_PurchProposalLineMain.insert();
+        #            TotalPurchProposalIns++;
+        #            Timer.stop(32);
+        #
+        #        }
+        #        else
+        #        {
+        #            if (DC_PurchProposalLineMain.Qty != DC_PurchProposalLine.Qty)
+        #            {
+        #                Timer.start(33);
+        #                DC_PurchProposalLineMain.Qty                    = DC_PurchProposalLine.Qty;
+        #                DC_PurchProposalLineMain.update();
+        #                TotalPurchProposalUpd++;
+        #                Timer.stop(33);
+        #            }
+        #        }
+        #        Timer.start(34);
+        #        update_recordset DC_PurchProposalLine_NotMain
+        #                setting RefProposalRecId = DC_PurchProposalLineMain.RecId,
+        #                        RefConsolidatedPurchProposalId = DC_PurchProposalLineMain.PurchProposalId,
+        #                        PurchProposalStatus = DC_PurchProposalStatus::Processed
+        #                where DC_PurchProposalLine_NotMain.ConnectionId  == DC_PurchProposalLineMain.ConnectionId
+        #                &&    DC_PurchProposalLine_NotMain.ItemId        == DC_PurchProposalLineMain.ItemId
+        #                &&    DC_PurchProposalLine_NotMain.InventLocationId    == DC_PurchProposalLineMain.InventLocationId
+        #                &&    DC_PurchProposalLine_NotMain.PurchProposalStatus <= DC_PurchProposalStatus::Processed
+        #                &&    DC_PurchProposalLine_NotMain.RefProposalRecId   != DC_PurchProposalLineMain.RecId
+        #                &&    DC_PurchProposalLine_NotMain.ConnectionId != ''
+        #                &&    DC_PurchProposalLine_NotMain.Approved == True
+        #                &&    DC_PurchProposalLine_NotMain.Locked == False
+        #                exists join InventTableModuleTmp2
+        #                    where InventTableModuleTmp2.ItemId          == DC_PurchProposalLine_NotMain.ItemId
+        #                    &&    InventTableModuleTmp2.ModuleType      == ModuleInventPurchSales::Purch
+        #                    &&    (InventTableModuleTmp2.HighestQty == 0 || InventTableModuleTmp2.HighestQty >= DC_PurchProposalLine_NotMain.Qty)
+        #                    &&    InventTableModuleTmp.Blocked         == False
+        #//TODO: Oprydning
+        #//                exists join InventDimTmp2
+        #//                    where InventDimTmp2.inventDimId == DC_PurchProposalLine_NotMain.InventDimId
+        #//                    &&    InventDimTmp2.InventLocationId != ''
+        #                exists join InventTableTmp2
+        #                    where InventTableTmp2.ItemId          == DC_PurchProposalLine.ItemId
+        #                    &&    (InventTableTmp2.DC_WithdrawDate == datenull() || InventTableTmp2.DC_WithdrawDate > systemdateget())
+        #
+        #
+        #                ;
+        #        Timer.stop(34);
+        #    }
+        #    Timer.stop(3);
+        #    ttscommit;
+        #    if (ShowTimer) this.ShowTimer(Timer);
+        #    Return Cnt;
+        #
+        #}
+        #
+      ENDSOURCE
+      SOURCE #Consolidate2PurchLines
+        #void Consolidate2PurchLines()
+        #{
+        #    DC_PurchProposalLine    DC_PurchProposalLine, DC_PurchProposalLineGrp, DC_PurchProposalLineTmp;
+        #    DC_PurchConnectionTable DC_PurchConnectionTable;
+        #//    DC_PurchConnectionLine  DC_PurchConnectionLine;
+        #
+        #//    InventDim               InventDim,InventDimGrp,InventDimTmp;
+        #    InventDim               InventDimFind;
+        #    AxPurchTable            AxPurchTable;
+        #    AxPurchLine             AxPurchLine;
+        #    PurchTable              PurchTable;
+        #    PurchLine               PurchLine;
+        #    VendTable               VendTable;
+        #    InventTable             InventTable,InventTableGrp, InventTableTmp;
+        #    DC_InventPackingCodeTable         DC_InventPackingCodeTable;
+        #    InventTrans             InventTrans;
+        #    RCMInventLocation       RCMInventLocation;
+        #    Boolean                 MakePurch;
+        #
+        #    int                     p;
+        #    Timer                   Timer = new Timer();
+        #    Boolean                 ShowTimer = false;
+        #
+        #    int64                   Cnt, CntMax;
+        #    sysOperationProgress    _progress;
+        #    ;
+        #    /* TIMER */ Timer.start(1);
+        #    select count(recid) from DC_PurchProposalLine
+        #        where DC_PurchProposalLine.PurchProposalStatus == DC_PurchProposalStatus::Consolidated;
+        #
+        #    CntMax = DC_PurchProposalLine.recid;
+        #    /* TIMER */ Timer.stop(1);
+        #
+        #    _progress = new sysOperationProgress();
+        #    _progress.setCaption("Opretter indkøb");
+        #    _progress.setAnimation(#AviUpdate);
+        #    _progress.setTotal(CntMax);
+        #
+        #
+        #    ttsbegin;
+        #    Cnt = 0;
+        #    //Find grupperingerne for VendAccount,connectionId, InventDimId
+        #    while select count(recid) from DC_PurchProposalLineGrp group by VendAccount,connectionId, InventLocationId //, InventDimId
+        #        where DC_PurchProposalLineGrp.PurchProposalStatus == DC_PurchProposalStatus::Consolidated
+        #        &&    DC_PurchProposalLineGrp.Locked == False
+        #//        &&    DC_PurchProposalLineGrp.ConnectionId == '854' //TODO - HUSK AT SLETTE IGEN
+        #//TODO: Oprydning
+        #//        join InventDimGrp group by InventLocationId
+        #//            where InventDimGrp.inventDimId == DC_PurchProposalLineGrp.InventDimId
+        #        join InventTableGrp group by DC_UNCode, DC_InventPackingCode
+        #            where InventTableGrp.ItemId == DC_PurchProposalLineGrp.ItemId
+        #     {
+        #        // Herefter er følgende låst på felterne:   DC_PurchProposalLineGrp.VendAccount,
+        #        //                                          DC_PurchProposalLineGrp.connectionId,
+        #        //                                          InventDim.InventLocationId
+        #        //                                          InventTableGrp.DC_UNCode
+        #        //                                          InventTableGrp.DC_InventPackingCode
+        #
+        #
+        #        Cnt += DC_PurchProposalLineGrp.RecId;
+        #        // Check at indkøbet bliver over minimum kg/stk - alternativt at den er med i undtagelsestabellen.
+        #        if (this.MiminumException(DC_PurchProposalLineGrp.InventLocationId) ||
+        #            this.SumAmountWeightOK(DC_PurchProposalLineGrp.VendAccount,DC_PurchProposalLineGrp.ConnectionId, DC_PurchProposalLineGrp.InventLocationId, InventTableGrp.DC_UNCode, InventTableGrp.DC_InventPackingCode))
+        #        {
+        #            /* TIMER */ Timer.start(2);
+        #            while select forupdate DC_PurchProposalLine order by VendAccount,connectionId,InventLocationId,ItemId
+        #                where DC_PurchProposalLine.PurchProposalStatus == DC_PurchProposalStatus::Consolidated
+        #                &&    DC_PurchProposalLine.VendAccount          == DC_PurchProposalLineGrp.VendAccount      //GrpBy
+        #                &&    DC_PurchProposalLine.connectionId         == DC_PurchProposalLineGrp.connectionId     //GrpBy
+        #                &&    DC_PurchProposalLine.InventLocationId     == DC_PurchProposalLineGrp.InventLocationId     //GrpBy
+        #                &&    DC_PurchProposalLine.Locked == False
+        #//TODO: Oprydning
+        #//                join InventDim
+        #//                    where InventDim.inventDimId         == DC_PurchProposalLine.InventDimId
+        #//                    &&    InventDim.InventLocationId    == InventDimGrp.InventLocationId                    //GrpBy
+        #                join DC_PurchConnectionTable
+        #                    where DC_PurchConnectionTable.DC_ConnectionId == DC_PurchProposalLine.ConnectionId
+        #                join Name from VendTable
+        #                    where VendTable.AccountNum == DC_PurchProposalLine.VendAccount
+        #                join recid,DC_UNCode,DC_InventPackingCode from InventTable
+        #                    where InventTable.ItemId == DC_PurchProposalLine.ItemId
+        #                    &&    InventTable.DC_UNCode == InventTableGrp.DC_UNCode                                 //GrpBy
+        #                    &&    InventTable.DC_InventPackingCode == InventTableGrp.DC_InventPackingCode           //GrpBy
+        #                join DC_DlvShip_EarliestDate_Offset, DC_DlvShip_LastDate_Offset, DC_LastOrderDate_Offset from DC_InventPackingCodeTable
+        #                    where DC_InventPackingCodeTable.InventPackingCode == InventTable.DC_InventPackingCode
+        #            {
+        #
+        #                _progress.setCount(Cnt);
+        #
+        #                // Hvis der allerede er påhæftet en PurchLine og antal er ændret, slettes denne først og ny reference dannes.
+        #
+        #                if (DC_PurchProposalLine.RefPurchRecId)
+        #                {
+        #                    if (PurchLine::findRecId(DC_PurchProposalLine.RefPurchRecId).PurchQty == DC_PurchProposalLine.Qty)
+        #                        continue;
+        #                    else
+        #                    {
+        #                        /* TIMER */ Timer.start(21);
+        #                        PurchLine = PurchLine::findRecId(DC_PurchProposalLine.RefPurchRecId,true);
+        #                        select sum(Qty) from InventTrans
+        #                            where InventTrans.InventTransId == PurchLine.InventTransId
+        #                            &&    InventTrans.StatusReceipt < StatusReceipt::Ordered;
+        #                        if (InventTrans.Qty)
+        #                        {
+        #                            throw error(StrFmt('Kan ikke konsolidere til indkøbslinie (Indk %1, vare %2, inventtransid %2), da der allerede er foretaget opdateringer på indkøbet',
+        #                                                PurchLine.PurchId, PurchLine.ItemId, PurchLine.InventTransId));
+        #                        }
+        #                        PurchLine.delete();
+        #                        DC_PurchProposalLine.RefPurchRecId = 0;
+        #                        DC_PurchProposalLine.PurchId = '';
+        #
+        #                        /* TIMER */ Timer.stop(21);
+        #                    }
+        #                }
+        #
+        #                if (!DC_PurchProposalLine.RefPurchRecId)
+        #                {
+        #                    /* TIMER */ Timer.start(24);
+        #                    select firstonly PurchTable
+        #                        where PurchTable.OrderAccount == DC_PurchProposalLineGrp.VendAccount                    //GrpBy
+        #                        &&    PurchTable.InventLocationId == DC_PurchProposalLineGrp.InventLocationId           //GrpBy
+        #                        &&    PurchTable.DC_Blocked == False
+        #                        exists join PurchLine
+        #                            where PurchLine.PurchId == PurchTable.PurchId
+        #                        exists join InventTableTmp
+        #                            where InventTableTmp.ItemId == PurchLine.ItemId
+        #                            &&    InventTableTmp.DC_UNCode == InventTableGrp.DC_UNCode                          //GrpBy
+        #                            &&    InventTableTmp.DC_InventPackingCode == InventTableGrp.DC_InventPackingCode;    //GrpBy
+        #//TODO: Oprydning
+        #//                        exists join DC_PurchProposalLineTmp
+        #//                            where DC_PurchProposalLineTmp.RefPurchRecId == PurchLine.RecId
+        #//                            &&    DC_PurchProposalLineTmp.ConnectionId  == DC_PurchProposalLineGrp.connectionId //GrpBy
+        #//                            &&    DC_PurchProposalLineTmp.Locked == False;
+        #                    if (!PurchTable)
+        #                    {
+        #                        select firstonly PurchTable
+        #                            where PurchTable.OrderAccount == DC_PurchProposalLineGrp.VendAccount                    //GrpBy
+        #                            &&    PurchTable.InventLocationId == DC_PurchProposalLineGrp.InventLocationId           //GrpBy
+        #                            &&    PurchTable.DeliveryDate == DC_PurchConnectionTable.DeliverToShip_LastDate
+        #                            &&    PurchTable.DC_Blocked == False
+        #                            notexists join PurchLine
+        #                                where PurchLine.PurchId == PurchTable.PurchId;
+        #                    }
+        #
+        #                    if (!PurchTable)
+        #                    {
+        #                        AxPurchTable = AxPurchTable::construct();
+        #                        AxPurchTable.parmOrderAccount(DC_PurchProposalLine.VendAccount);
+        #                        AxPurchTable.parmDeliveryDate(DC_PurchConnectionTable.DeliverToShip_LastDate);
+        #                        AxPurchTable.parmInventLocationId(DC_PurchProposalLine.InventLocationId);
+        #                        AxPurchTable.parmPurchName('(auto) '+VendTable.Name);
+        #                        AxPurchTable.parmConnectionId(DC_PurchProposalLine.ConnectionId);
+        #                        AxPurchTable.save();
+        #                        TotalPurchTableIns++;
+        #
+        #                        PurchTable = PurchTable::find(AxPurchTable.parmPurchId(),true);
+        #                        PurchTable.setAddressFromInventLocationId(PurchTable.InventLocationId);
+        #                        PurchTable.doUpdate();
+        #
+        #                    }
+        #                    else
+        #                        AxPurchTable = PurchTable.axPurchTable();
+        #                    /* TIMER */ Timer.stop(24);
+        #
+        #                    _progress.setText(StrFmt('Item:%1, Con:%2, Loc:%3, Purch:%4',DC_PurchProposalLine.ItemId,
+        #                                                                                                DC_PurchProposalLine.ConnectionId,
+        #                                                                                                DC_PurchProposalLine.InventLocationId,
+        #                                                                                                AxPurchTable.parmPurchId()
+        #                                                                                                ));
+        #                    /* TIMER */ Timer.start(25);
+        #//TODO: Oprydning
+        #//                    if (!InventDim.RecId)
+        #//                        throw Error(StrFmt('InventDim %1 kan ikke findes',DC_PurchProposalLine.InventDimId));
+        #                    InventDimFind.InventLocationId = DC_PurchProposalLine.InventLocationId;
+        #                    InventDimFind = InventDim::findOrCreate(InventDimFind);
+        #                    if (!InventDimFind)
+        #                        Throw error(StrFmt('InventDim not found on InventLocationId %1',DC_PurchProposalLine.InventLocationId));
+        #                    AxPurchLine = AxPurchLine::construct();
+        #                    AxPurchLine.axPurchTable(AxPurchTable);
+        #                    AxPurchLine.parmItemId(DC_PurchProposalLine.ItemId);
+        #                    AxPurchLine.parmPurchQty(DC_PurchProposalLine.Qty);
+        #                    AxPurchLine.parmQtyOrdered(DC_PurchProposalLine.Qty);
+        #                    AxPurchLine.parmInventDimId(InventDimFind.inventDimId); //DC_PurchProposalLine.inventDimId);
+        #                    AxPurchLine.parmDeliveryDate(DC_PurchConnectionTable.DeliverToShip_LastDate+DC_InventPackingCodeTable.DC_DlvShip_LastDate_Offset);
+        #                    AxPurchLine.axInventDim(axInventDim::newInventDim(InventDimFind));
+        #                    axPurchLine.setFieldAsTouched(fieldnum(PurchLine,InventDimId));
+        #                    axPurchLine.setFieldAsTouched(fieldnum(PurchLine,QtyOrdered));
+        #                    axPurchLine.setFieldAsTouched(fieldnum(PurchLine,PurchQty));
+        #
+        #                    axPurchLine.parmPurchPrice(this.PurchPrice(DC_PurchProposalLine.VendAccount,
+        #                                                               DC_PurchProposalLine.ItemId,
+        #                                                               DC_PurchConnectionTable.LastOrderDate,
+        #                                                               DC_PurchProposalLine.Qty,
+        #                                                               InventDimFind));
+        #                    //PurchLine = AxPurchLine.purchLine();
+        #                    /* TIMER */ Timer.stop(25);
+        #                    /* TIMER */ Timer.start(26);
+        #
+        #                    AxPurchLine.save();
+        #                    PurchLine = AxPurchLine.purchLine();
+        #                    PurchLine.DC_DeliverToShip_EarliestDate = DC_PurchConnectionTable.DeliverToShip_EarliestDate + DC_InventPackingCodeTable.DC_DlvShip_EarliestDate_Offset;
+        #                    PurchLine.DC_DeliverToShip_LastDate = DC_PurchConnectionTable.DeliverToShip_LastDate + DC_InventPackingCodeTable.DC_DlvShip_LastDate_Offset;
+        #
+        #                    PurchLine.doupdate();
+        #                    /* TIMER */ TImer.stop(26);
+        #                    TotalPurchIns += 1;
+        #                    /* TIMER */ Timer.start(27);
+        #                    if (PurchLine.RecId)
+        #                    {
+        #                        if (DC_PurchProposalLine.RefPurchRecId != AxPurchLine.purchLine().RecId)
+        #                        {
+        #                            DC_PurchProposalLine.RefPurchRecId       = AxPurchLine.purchLine().RecId;
+        #                            DC_PurchProposalLine.PurchId             = AxPurchLine.purchLine().PurchId;
+        #                            DC_PurchProposalLine.update();
+        #
+        #                        }
+        #                        /* TIMER */ Timer.stop(27);
+        #                        /* TIMER */ Timer.start(28);
+        #                        this.UpdatePurch2FOOrders(PurchLine);
+        #                        /* TIMER */ Timer.stop(28);
+        #                    }
+        #                    else
+        #                        error(StrFmt('Indkøb er ikke oprettet - DC_PurchProposalLine %1',DC_PurchProposalLine.PurchProposalId));
+        #                } // if (!DC_PurchProposalLine.RefPurchRecId)
+        #            } // while select forupdate DC_PurchProposalLine
+        #        } //if (this.SumAmountWeightOK(DC_PurchProposalLineGrp.VendAccount,DC_PurchProposalLineGrp.ConnectionId, InventDim))
+        #        Timer.stop(2);
+        #    } // while select DC_PurchProposalLineGrp group by
+        #    ttscommit;
+        #    if (ShowTimer) this.ShowTimer(Timer);
+        #}
+      ENDSOURCE
+      SOURCE #dialog
+        #public Object dialog()
+        #{
+        #    DialogRunbase       dialog = super();
+        #    #resAppl
+        #;
+        #    DlgTest = dialog.addFieldValue(typeid(noyesid),Test,'Kør konsolidering som test');
+        #    return dialog;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #dialogPostRun
+        #public void dialogPostRun(DialogRunbase dialog)
+        #{
+        #;
+        #    super(dialog);
+        #}
+      ENDSOURCE
+      SOURCE #getFromDialog
+        #public boolean getFromDialog()
+        #{
+        #    Boolean     ret = super();
+        #;
+        #    Test = DlgTest.value();
+        #    return ret;
+        #}
+      ENDSOURCE
+      SOURCE #LockProposalLines
+        #void LockProposalLines()
+        #{
+        #    PurchLine               PurchLine;
+        #    VendPurchOrderTrans     VendPurchOrderTrans;
+        #    VendReceiptsListTrans   VendReceiptsListTrans;
+        #    VendPackingSlipTrans    VendPackingSlipTrans;
+        #    VendInvoiceTrans        VendInvoiceTrans;
+        #    DC_PurchProposalLine    DC_PurchProposalLine, DC_PurchProposalLineMain;
+        #    ;
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.RefPurchRecId != 0
+        #        exists join PurchLine where PurchLine.RecId == DC_PurchProposalLine.RefPurchRecId
+        #        exists join VendPurchOrderTrans where VendPurchOrderTrans.InventTransId == PurchLine.InventTransId;
+        #
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.RefPurchRecId != 0
+        #        exists join PurchLine where PurchLine.RecId == DC_PurchProposalLine.RefPurchRecId
+        #        exists join VendReceiptsListTrans where VendReceiptsListTrans.InventTransId == PurchLine.InventTransId;
+        #
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.RefPurchRecId != 0
+        #        exists join PurchLine where PurchLine.RecId == DC_PurchProposalLine.RefPurchRecId
+        #        exists join VendPackingSlipTrans where VendPackingSlipTrans.InventTransId == PurchLine.InventTransId;
+        #
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.RefPurchRecId != 0
+        #        exists join PurchLine where PurchLine.RecId == DC_PurchProposalLine.RefPurchRecId
+        #        exists join VendInvoiceTrans where VendInvoiceTrans.InventTransId == PurchLine.InventTransId;
+        #
+        #    //Locking all sub-ProposalLines
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        exists join DC_PurchProposalLineMain
+        #            where DC_PurchProposalLineMain.RecId == DC_PurchProposalLine.RefProposalRecId
+        #            &&    DC_PurchProposalLineMain.Locked == true;
+        #
+        #}
+      ENDSOURCE
+      SOURCE #MailInfo
+        #Map MailInfo()
+        #{
+        #    DC_PurchConnectionTable Connection;
+        #    Str                     EmailStr;
+        #    Str                     HeaderStr;
+        #    Map                     EmailMap = new Map(Types::String,Types::String);
+        #    DC_PurchProposalLine    DC_PurchProposalLine;
+        #    ;
+        #    HeaderStr += StrFmt('Konsolidering afviklet Indk(Ins %1/Upd %2), IndkForslag(Ins %3/Upd %4)',TotalPurchProposalIns,TotalPurchProposalUpd,TotalPurchIns,TotalPurchUpd);
+        #    EmailStr += HeaderStr + StrFmt('   Blokerede varer %1,  Varer over max %2, Varer under min kg/kr %3, IndkForslag ubehandlet %4',
+        #        ErrItemsBlocked, ErrItemsOverMax, ErrItemUnderMin, ErrUbehandledeIndkForslag);
+        #
+        #
+        #    EmailMap.insert('Header',HeaderStr);
+        #    EmailMap.insert('Content',EmailStr);
+        #
+        #    Return EmailMap;
+        #}
+      ENDSOURCE
+      SOURCE #MiminumException
+        #Boolean MiminumException(InventLocationId   InventLocationId)
+        #{
+        #    Boolean                         MinimumException;
+        #//TODO: Oprydning
+        #//    InventDim                       InventDim = InventDim::find(InventDimId);
+        #//    InventLocationId                InventLocationId = InventDim.InventLocationId;
+        #    DC_PurchConsolidateExceptions   DC_PurchConsolidateExceptions;
+        #    ;
+        #    select firstonly DC_PurchConsolidateExceptions
+        #        where DC_PurchConsolidateExceptions.DC_PurchConsolidateExceptionType == DC_PurchConsolidateExceptionType::MinValues
+        #        &&    DC_PurchConsolidateExceptions.InventLocationId == InventLocationId;
+        #    if (DC_PurchConsolidateExceptions.RecId)
+        #        MinimumException = true;
+        #
+        #    Return MinimumException;
+        #}
+      ENDSOURCE
+      SOURCE #pack
+        #public container pack()
+        #{
+        #    return [#CurrentVersion,#CurrentList];
+        #}
+      ENDSOURCE
+      SOURCE #PurchPrice
+        #Price PurchPrice(VendAccount    VendAccount,
+        #                 ItemId         ItemId,
+        #                 PriceDate      PriceDate,
+        #                 Qty            Qty,
+        #                 InventDim      InventDim)
+        #{
+        #    PriceDisc_Price     PriceDisc_Price;
+        #    InventTableModule   InventTableModule = InventTableModule::find(ItemId, ModuleInventPurchSales::Purch);
+        #    ;
+        #    PriceDisc_Price = new PriceDisc_Price();
+        #    PriceDisc_Price.parmAccountNum(VendAccount);
+        #    PriceDisc_Price.parmModuleType(ModuleInventPurchSales::Purch);
+        #    PriceDisc_Price.parmItemId(ItemId);
+        #    PriceDisc_Price.parmPriceDate(PriceDate);
+        #    PriceDisc_Price.parmUnitID(InventTableModule.UnitId);
+        #    PriceDisc_Price.parmQty(Qty);
+        #    PriceDisc_Price.parmInventDim(InventDim);
+        #    Return PriceDisc_Price.price();
+        #
+        #
+        #}
+      ENDSOURCE
+      SOURCE #run
+        #public void run()
+        #{
+        #    #OCCRetryCount
+        #    if (! this.validate())
+        #        throw error("");
+        #
+        #    try
+        #    {
+        #        ttsbegin;
+        #        //info(StrFmt('Funcname %1',funcname()));
+        #        this.Update();
+        #
+        #        ttscommit;
+        #    }
+        #    catch (Exception::Deadlock)
+        #    {
+        #        retry;
+        #    }
+        #    catch (Exception::UpdateConflict)
+        #    {
+        #        if (appl.ttsLevel() == 0)
+        #        {
+        #            if (xSession::currentRetryCount() >= #RetryNum)
+        #            {
+        #                throw Exception::UpdateConflictNotRecovered;
+        #            }
+        #            else
+        #            {
+        #                retry;
+        #            }
+        #        }
+        #        else
+        #        {
+        #            throw Exception::UpdateConflict;
+        #        }
+        #    }
+        #
+        #}
+      ENDSOURCE
+      SOURCE #ShowTimer
+        #private void ShowTimer(Timer Timer)
+        #{
+        #    Int p;
+        #    ;
+        #    for (p = 1;p<=1000;p++)
+        #    {
+        #        if (Timer.time(p))
+        #        {
+        #            info(StrFmt('%1 time %2',p,Timer.time(p)));
+        #            DC_PurchConsolidateLog::Writelog(StrFmt('%1 time %2',p,Timer.time(p)),LogID,SysInfologLevel::None,'PurchConsolidate');
+        #        }
+        #    }
+        #
+        #}
+      ENDSOURCE
+      SOURCE #SumAmountWeightOK
+        #Boolean    SumAmountWeightOK(VendAccount         VendAccount,
+        #                             DC_connectionId     connectionId,
+        #                             InventLocationId    InventLocationId,
+        #                             DC_UNCode           DC_UNCode,
+        #                             DC_PackingCode      DC_PackingCode
+        #                            )
+        #{
+        #    DC_PurchProposalLine    DC_PurchProposalLine;
+        #    DC_PurchConnectionTable DC_PurchConnectionTable = DC_PurchConnectionTable::find(ConnectionId);
+        #    PriceDisc_Price         PriceDisc_Price;
+        #    TransDate               PriceDate;
+        #    Price                   PurchPrice;
+        #    Real                    SumAmountPurch;
+        #    Real                    SumWeightPurch;
+        #    VendTable               VendTable;
+        #    Boolean                 SumAmountWeightOK;
+        #    Str 100                 ErrorTxt;
+        #    Real                    MinValue;
+        #
+        #    InventTable             InventTable;
+        #    InventDim               InventDimFind;
+        #    InventTableModule       InventTableModule;
+        #    ;
+        #    VendTable = VendTable::find(VendAccount);
+        #    if (!VendTable)
+        #    {
+        #        select firstonly DC_PurchProposalLine
+        #            where DC_PurchProposalLine.VendAccount == VendAccount
+        #            &&    DC_PurchProposalLine.ConnectionId == connectionId
+        #            &&    DC_PurchProposalLine.PurchProposalStatus == DC_PurchProposalStatus::Consolidated;
+        #        throw error(StrFmt('Kreditor %1 findes ikke (Varenummer %2, Indkøbsforslag %3)',VendAccount,DC_PurchProposalLine.ItemId, DC_PurchProposalLine.PurchProposalId));
+        #
+        #    }
+        #    PriceDate = DC_PurchConnectionTable.LastOrderDate;
+        #
+        #    while select sum(Qty) from DC_PurchProposalLine group by ItemId
+        #        where DC_PurchProposalLine.VendAccount      == VendAccount
+        #        &&    DC_PurchProposalLine.ConnectionId     == connectionId
+        #        &&    DC_PurchProposalLine.InventLocationId == InventLocationId
+        #        &&    DC_PurchProposalLine.PurchProposalStatus == DC_PurchProposalStatus::Consolidated
+        #        join DC_UNCode,DC_InventPackingCode from InventTable
+        #            where InventTable.DC_UNCode             == DC_UNCode
+        #            &&    InventTable.DC_InventPackingCode  == DC_PackingCode
+        #            &&    InventTable.ItemId                == DC_PurchProposalLine.ItemId
+        #//TODO: Oprydning
+        #//        join InventDim
+        #//            where InventDim.inventDimId             == DC_PurchProposalLine.InventDimId
+        #//            &&    InventDim.InventLocationId        == InventLocationId
+        #        exists join InventTableModule
+        #            where InventTableModule.ItemId          == InventTable.ItemId
+        #            &&    InventTableModule.ModuleType      == ModuleInventPurchSales::Purch
+        #            &&    (InventTableModule.HighestQty == 0 || InventTableModule.HighestQty >= DC_PurchProposalLine.Qty)
+        #    {
+        #        switch (VendTable.DC_PurchProposalMinType)
+        #        {
+        #            case  DC_PurchProposalMinType::MinAmount :
+        #                InventTableModule = InventTable.inventTableModulePurch();
+        #                InventDimFind.InventLocationId = DC_PurchProposalLine.InventLocationId;
+        #                InventDimFind = InventDim::findDim(InventDimFind);
+        #                PurchPrice = this.PurchPrice(VendAccount, DC_PurchProposalLine.ItemId, PriceDate,DC_PurchProposalLine.Qty, InventDimFind);
+        #                SumAmountPurch += PurchPrice * DC_PurchProposalLine.Qty;
+        #                break;
+        #            case DC_PurchProposalMinType::MinWeight :
+        #                SumWeightPurch +=  DC_PurchProposalLine.Qty * InventTable::find(DC_PurchProposalLine.ItemId).grossWeight(); //.DC_InventColliGrossWeight;
+        #                break;
+        #         }
+        #    }
+        #    MinValue = DC_PurchConnectionTable.DC_ShipmentType == DC_ShipmentType::Ship ? VendTable.DC_PurchProposalMinShip : VendTable.DC_PurchProposalMinAir;
+        #    switch (VendTable.DC_PurchProposalMinType)
+        #    {
+        #        case  DC_PurchProposalMinType::MinAmount :
+        #            SumAmountWeightOK = SumAmountPurch >= MinValue ? true : false;
+        #            if (!SumAmountWeightOK)
+        #                ErrorTxt = StrFmt('@KNI834',SumAmountPurch,MinValue);
+        #            break;
+        #        case DC_PurchProposalMinType::MinWeight :
+        #            SumAmountWeightOK = SumWeightPurch >= MinValue ? true : false;
+        #            if (!SumAmountWeightOK)
+        #                ErrorTxt = StrFmt('@KNI835',SumWeightPurch,MinValue);
+        #            break;
+        #    }
+        #    if (!SumAmountWeightOK)
+        #    {
+        #
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('@KNI836'+ErrorTxt,VendAccount,ConnectionId),LogId,SysInfologLevel::Error,'PurchConsolidate');
+        #        ErrItemUnderMin++;
+        #    }
+        #    Return SumAmountWeightOK;
+        #}
+      ENDSOURCE
+      SOURCE #unpack
+        #public boolean unpack(container packedClass)
+        #{
+        #    Version version = RunBase::getVersion(packedClass);
+        #;
+        #    switch (version)
+        #    {
+        #        case #CurrentVersion:
+        #            [version,#CurrentList] = packedClass;
+        #            break;
+        #        default:
+        #            return false;
+        #    }
+        #
+        #    return true;
+        #}
+      ENDSOURCE
+      SOURCE #update
+        #void update()
+        #{
+        #
+        #    InventLocation                  InventLocation;
+        #    int                             Start = WinApi::getTickCount();
+        #    DC_PurchProposalLine            DC_PurchProposalLine;
+        #    //InventDim                       InventDim;
+        #    int64                           Cnt;
+        #    ;
+        #    LogID = DC_PurchConsolidateLog::NextLogId();
+        #    select count(recid) From DC_PurchProposalLine;
+        #    Cnt = DC_PurchProposalLine.recid;
+        #
+        #    this.LockProposalLines();
+        #    this.Consolidate2IOFConsolidated();
+        #    this.Consolidate2PurchLines();
+        #
+        #
+        #    //DC_PurchConsolidateLog::Writelog(StrFmt('Ialt %1 indkøbforslagslinier behandlet. Tid ialt %2',Cnt,(WinApi::getTickCount()-Start)/1000),LogID);
+        #    if (TotalPurchProposalIns || TotalPurchProposalUpd)
+        #    {
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Indkøbsforslagslinier oprettet %1, opdateret %2',TotalPurchProposalIns,TotalPurchProposalUpd),LogID,SysInfologLevel::None,'PurchConsolidate');
+        #        info(StrFmt('Indkøbsforslagslinier oprettet %1, opdateret %2',TotalPurchProposalIns,TotalPurchProposalUpd));
+        #    }
+        #
+        #    if (TotalPurchIns || TotalPurchUpd)
+        #    {
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Indkøbsordrelinier oprettet %1, opdateret %2',TotalPurchIns,TotalPurchUpd),LogID,SysInfologLevel::None,'PurchConsolidate');
+        #        info(StrFmt('Indkøbsordrer oprettet %1',TotalPurchTableIns));
+        #    }
+        #
+        #    if (TotalPurchTableIns)
+        #    {
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Indkøbsordrer oprettet %1',TotalPurchTableIns),LogID,SysInfologLevel::None,'PurchConsolidate');
+        #    }
+        #    select count(recid) from DC_PurchProposalLine
+        #        where DC_PurchProposalLine.PurchProposalStatus == DC_PurchProposalStatus::Unprocessed;
+        #    ErrUbehandledeIndkForslag = DC_PurchProposalLine.RecId;
+        #
+        #    DC_SysMailer::sendMail('Indk_Sys','da','llu@lundpartner.dk','',this.MailInfo(),''); //'\\\\fileserver\\Faelles\\Supergros\\prisliste 2.txt');
+        #
+        #    //DC_PurchConsolidateLog::SendMail(LogId, 'llu@lundpartner.dk');
+        #
+        #    //info(StrFmt('Ialt %1 indkøbforslagslinier behandlet. Tid ialt %2',Cnt,(WinApi::getTickCount()-Start)/1000));
+        #    Info(strfmt('Blokerede varer %1',ErrItemsBlocked));
+        #    Info(strfmt('Varelinier over max antal %1',ErrItemsOverMax));
+        #    Info(strfmt('Varelinier under min %1 kg/kr',ErrItemUnderMin));
+        #    Info(strfmt('Ubehandlede indkøbsforslag %1',ErrUbehandledeIndkForslag));
+        #
+        #}
+        #
+      ENDSOURCE
+      SOURCE #UpdatePurch2FOOrders
+        #void UpdatePurch2FOOrders(PurchLine  PurchLine)
+        #{
+        #    DC_PurchProposalLine    DC_PurchProposalLineMain;
+        #    DC_PurchProposalLine    DC_PurchProposalLine;
+        #    RCMSupFOOrders          RCMSupFOOrders;
+        #    RCMSupFOOrderReference  RCMSupFOOrderReference;
+        #
+        #    RCMSupFOOrderReference  RCMSupFOOrderReferenceInsert;
+        #    ;
+        #    select firstonly DC_PurchProposalLineMain
+        #        where DC_PurchProposalLineMain.RefPurchRecId == PurchLine.RecId;
+        #
+        #    ttsbegin;
+        #    while select DC_PurchProposalLine
+        #        where DC_PurchProposalLine.RefProposalRecId == DC_PurchProposalLineMain.RecId
+        #        join RCMSupFOOrders
+        #            where RCMSupFOOrders.OrderId == DC_PurchProposalLine.RCMSupFOOrderId
+        #        notexists join RCMSupFOOrderReference
+        #            where RCMSupFOOrderReference.RefType == RCMSupTransactionTypes::PurchOrder
+        #            &&    RCMSupFOOrderReference.OrderId == RCMSupFOOrders.OrderId
+        #            &&    RCMSupFOOrderReference.RefPurchId   == PurchLine.PurchId
+        #            &&    RCMSupFOOrderReference.RefCompanyId == PurchLine.dataAreaId
+        #    {
+        #        select firstonly forupdate RCMSupFOOrderReferenceInsert
+        #            where RCMSupFOOrderReferenceInsert.RefType == RCMSupTransactionTypes::PurchOrder
+        #            &&    RCMSupFOOrderReferenceInsert.OrderId == RCMSupFOOrders.OrderId;
+        #
+        #        // RCMSupFOOrderReferenceInsert.clear();
+        #        RCMSupFOOrderReferenceInsert.RefType = RCMSupTransactionTypes::PurchOrder;
+        #        RCMSupFOOrderReferenceInsert.OrderId = RCMSupFOOrders.OrderId;
+        #        RCMSupFOOrderReferenceInsert.RefId   = PurchLine.PurchId;
+        #        RCMSupFOOrderReferenceInsert.RefPurchId = PurchLine.PurchId;
+        #        RCMSupFOOrderReferenceInsert.RefCompanyId = PurchLine.dataAreaId;
+        #
+        #        RCMSupFOOrderReferenceInsert.write();
+        #    }
+        #    ttscommit;
+        #}
+      ENDSOURCE
+      SOURCE #ValidateWithdrawDate
+        #void ValidateWithdrawDate()
+        #{
+        #    DC_PurchProposalLine    DC_PurchProposalLine;
+        #    InventTableModule       InventTableModuleTmp;
+        #//    InventDim               InventDimTmp;
+        #    InventTable             InventTableTmp;
+        #    Str 200                 ErrTxt;
+        #
+        #    InventDim               InventDim;
+        #    ;
+        #    while select sum(Qty) from DC_PurchProposalLine group by itemid,ConnectionId,InventLocationId,PurchProposalId
+        #        where DC_PurchProposalLine.PurchProposalStatus <= DC_PurchProposalStatus::Processed
+        #        &&    DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.Approved == True
+        #        &&    DC_PurchProposalLine.ConnectionId != ''
+        #//TODO: Oprydning
+        #//        join InventDim
+        #//            where InventDim.inventDimId == DC_PurchProposalLine.InventDimId
+        #        exists join InventTableModuleTmp
+        #            where InventTableModuleTmp.ItemId          == DC_PurchProposalLine.ItemId
+        #            &&    InventTableModuleTmp.ModuleType      == ModuleInventPurchSales::Purch
+        #            &&    (InventTableModuleTmp.HighestQty == 0 || InventTableModuleTmp.HighestQty >= DC_PurchProposalLine.Qty)
+        #            &&    InventTableModuleTmp.Blocked         == False
+        #//TODO: Oprydning
+        #//        exists join InventDimTmp
+        #//            where InventDimTmp.inventDimId == DC_PurchProposalLine.InventDimId
+        #//            &&    InventDimTmp.InventLocationId != ''
+        #        notexists join InventTableTmp
+        #            where InventTableTmp.ItemId          == DC_PurchProposalLine.ItemId
+        #            &&    (InventTableTmp.DC_WithdrawDate == datenull() || InventTableTmp.DC_WithdrawDate > systemdateget())
+        #    {
+        #        ErrTxt = 'Vare %2 har overskredet udmeldingsdato og er ikke medtaget i konsolideringen';
+        #        Warning(StrFmt(ErrTxt, DC_PurchProposalLine.PurchProposalId,DC_PurchProposalLine.ItemId,DC_PurchProposalLine.ConnectionId,DC_PurchProposalLine.InventLocationId));
+        #
+        #    }
+        #
+        #}
+      ENDSOURCE
+      SOURCE #construct
+        #server static DC_PurchConsolidateBatch construct()
+        #{
+        #    ;
+        #    Return New DC_PurchConsolidateBatch();
+        #//    return null;
+        #}
+      ENDSOURCE
+      SOURCE #description
+        #// Here goes a description of the class
+        #static ClassDescription description()
+        #{
+        #    return "DC Indkøbskonsolidering";
+        #}
+      ENDSOURCE
+      SOURCE #LockProposalLinesFromPurch
+        #static void LockProposalLinesFromPurch(PurchTable  PurchTable)
+        #{
+        #    PurchLine               PurchLine;
+        #    VendPurchOrderTrans     VendPurchOrderTrans;
+        #    VendReceiptsListTrans   VendReceiptsListTrans;
+        #    VendPackingSlipTrans    VendPackingSlipTrans;
+        #    VendInvoiceTrans        VendInvoiceTrans;
+        #    DC_PurchProposalLine    DC_PurchProposalLine, DC_PurchProposalLineMain;
+        #    ;
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.RefPurchRecId != 0
+        #        exists join PurchLine where PurchLine.RecId == DC_PurchProposalLine.RefPurchRecId
+        #                              &&    PurchLine.PurchId == PurchTable.PurchId
+        #        exists join VendPurchOrderTrans where VendPurchOrderTrans.InventTransId == PurchLine.InventTransId;
+        #
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.RefPurchRecId != 0
+        #        exists join PurchLine where PurchLine.RecId == DC_PurchProposalLine.RefPurchRecId
+        #                              &&    PurchLine.PurchId == PurchTable.PurchId
+        #        exists join VendReceiptsListTrans where VendReceiptsListTrans.InventTransId == PurchLine.InventTransId;
+        #
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.RefPurchRecId != 0
+        #        exists join PurchLine where PurchLine.RecId == DC_PurchProposalLine.RefPurchRecId
+        #                              &&    PurchLine.PurchId == PurchTable.PurchId
+        #        exists join VendPackingSlipTrans where VendPackingSlipTrans.InventTransId == PurchLine.InventTransId;
+        #
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        &&    DC_PurchProposalLine.RefPurchRecId != 0
+        #        exists join PurchLine where PurchLine.RecId == DC_PurchProposalLine.RefPurchRecId
+        #                              &&    PurchLine.PurchId == PurchTable.PurchId
+        #        exists join VendInvoiceTrans where VendInvoiceTrans.InventTransId == PurchLine.InventTransId;
+        #
+        #    //Locking all sub-ProposalLines
+        #    update_recordset DC_PurchProposalLine setting Locked = True
+        #        where DC_PurchProposalLine.Locked == False
+        #        exists join DC_PurchProposalLineMain
+        #            where DC_PurchProposalLineMain.RecId == DC_PurchProposalLine.RefProposalRecId
+        #            &&    DC_PurchProposalLineMain.Locked == true
+        #            exists join PurchLine where PurchLine.RecId == DC_PurchProposalLineMain.RefPurchRecId
+        #                                  &&    PurchLine.PurchId == PurchTable.PurchId;
+        #
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #server static void main(args args)
+        #{
+        #    DC_PurchConsolidateBatch DC_PurchConsolidateBatch;
+        #    ;
+        #    DC_PurchConsolidateBatch = DC_PurchConsolidateBatch::construct();
+        #    if (DC_PurchConsolidateBatch.prompt())
+        #        DC_PurchConsolidateBatch.run();
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics Class: DC_IntegrationSG udlæst
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #DC_IntegrationSG
+    PROPERTIES
+      Name                #DC_IntegrationSG
+      Extends             #DC_Integration
+      RunOn               #Called from
+    ENDPROPERTIES
+    
+    METHODS
+      Version: 3
+      SOURCE #CheckPurchTableErrors
+        #Boolean CheckPurchTableErrors(PurchTable    PurchTable)
+        #{
+        #    Boolean ret = True;
+        #    ;
+        #    if (!PurchTable.DC_ConnectionId)
+        #    {
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Indkøb %1 har ingen connection - derfor ikke afsendt til SG',PurchTable.PurchId),LogId,SysInfologLevel::Error,'SGIntegration');
+        #        Ret = False;
+        #    }
+        #    if (!this.GetSGCustId(PurchTable))
+        #    {
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Indkøb %1 har ingen SG kundenr - derfor ikke afsendt til SG',PurchTable.PurchId),LogId,SysInfologLevel::Error,'SGIntegration');
+        #        Ret = False;
+        #    }
+        #    if (DC_PurchConnectionTable::find(PurchTable.DC_ConnectionId).LastOrderDate < systemDateget()-1 && !Exceptions_ConnectionMap.exists(PurchTable.DC_ConnectionId) && !Exceptions_PurchIdMap.exists(PurchTable.PurchId) )
+        #    {
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Indkøb %1 har overskredet sidste bestillingsdato for forbindelse %1 og er ikke afsendt til SG',PurchTable.PurchId),LogId,SysInfologLevel::Error,'SGIntegration');
+        #        Ret = False;
+        #    }
+        #    Return Ret;
+        #}
+      ENDSOURCE
+      SOURCE #classDeclaration
+        #
+        #class DC_IntegrationSG extends DC_Integration
+        #{
+        #
+        #    str 6           Fileshipdate;
+        #    str 4           Fileshiptime;
+        #    int             Lines;
+        #    int             Colli;
+        #    sysOperationProgress        _progress;
+        #    DC_FileRefId    DC_FileRefId;
+        #    Str 10          LogID;
+        #    Map             Exceptions_ConnectionMap;
+        #    Map             Exceptions_PurchIdMap;
+        #
+        #    // Packed variables
+        #    Boolean Test;
+        #    Range           PurchIdRange;
+        #    range           InventLocationRange;
+        #    range           IncludeExtra;
+        #    Boolean         DoMakeReqFiles;
+        #    Boolean         DoHandleReadfiles;
+        #    CopyMove        DoMoveCopyReadfiles;
+        #    Boolean         DoHandleSGReceiptFiles;
+        #    Boolean         DoHandleSGInvoiceFiles;
+        #
+        #
+        #  // Dialog fields
+        #    DialogField DlgTest;
+        #    Dialogfield     DlgPurchIdRange;
+        #    DialogField     DlgInventLocationRange;
+        #    DialogField     DlgDoMakeReqFiles;
+        #    DialogField     DlgDoHandleReadfiles;
+        #    DialogField     DlgDoMoveCopyReadfiles;
+        #    DialogField     DlgDoHandleSGReceiptFiles;
+        #    DialogField     DlgDoHandleSGInvoiceFiles;
+        #    DialogField     DlgIncludeExtra;
+        #
+        #    #define.CurrentVersion(1)
+        #    #define.Version1(1)
+        #    #localmacro.CurrentList
+        #        Test,
+        #        PurchIdRange,
+        #        InventLocationRange,
+        #        DoMakeReqFiles,
+        #        DoHandleReadfiles,
+        #        DoMoveCopyReadfiles,
+        #        DoHandleSGReceiptFiles,
+        #        DoHandleSGInvoiceFiles,
+        #        IncludeExtra
+        #    #endmacro
+        #}
+      ENDSOURCE
+      SOURCE #DateFmt
+        #Str 6 DateFmt(date  transdate, boolean _reverse = false)
+        #{
+        #    Return _reverse ? date2str(transdate,321,2,0,2,0,2) : date2str(transdate,123,2,0,2,0,2);
+        #}
+      ENDSOURCE
+      SOURCE #dialog
+        #public Object dialog()
+        #{
+        #    DialogRunbase       dialog = super();
+        #    #resAppl
+        #;
+        #    DlgTest                 = dialog.addFieldValue(typeid(noyesid),Test,'Kør konsolidering som test');
+        #
+        #    dialog.addGroup('Afgrænsninger');
+        #    DlgPurchIdRange         = dialog.addFieldValue(typeid(range),PurchIdRange,'Afgrænsning på indk.ordre', 'Vil typisk være blank - og kun udfyldes i samarbejde med Datacon');
+        #    DlgInventLocationRange  = dialog.addFieldValue(typeid(range),InventLocationRange,'Afgrænsning på lagersted', 'Vil typisk være blank - og kun udfyldes i samarbejde med Datacon');
+        #    dialog.addGroup('Ekstra');
+        #    DlgIncludeExtra         = dialog.addFieldValue(typeid(range),IncludeExtra,'Forbindelser incl. udover dd','Hvis du vil inkludere en forbindelse udover dem der har sidste bestilling dags dato');
+        #
+        #    dialog.addGroup('Flow');
+        #    DlgDoMakeReqFiles           = dialog.addFieldValue(typeid(boolean) ,DoMakeReqFiles,        'Dan rekvisitionsfil');
+        #    DlgDoHandleReadfiles        = dialog.addFieldValue(typeid(boolean) ,DoHandleReadfiles,     'Håndtering af filer fra SG');
+        #    DlgDoMoveCopyReadfiles      = dialog.addFieldValue(typeid(CopyMove),DoMoveCopyReadfiles,   'Kopier eller flyt filer fra SG');
+        #    DlgDoHandleSGReceiptFiles   = dialog.addFieldValue(typeid(boolean) ,DoHandleSGReceiptFiles,'Håndtering af kvitteringsfiler fra SG');
+        #    DlgDoHandleSGInvoiceFiles   = dialog.addFieldValue(typeid(boolean) ,DoHandleSGInvoiceFiles,'Håndtering af fakturafiler fra SG');
+        #
+        #    return dialog;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #ErrorMail
+        #void ErrorMail()
+        #{
+        #    warning('Errormail - Endnu ikke defineret');
+        #}
+      ENDSOURCE
+      SOURCE #Exceptions_ConnectionMap
+        #Map Exceptions_ConnectionMap()
+        #{
+        #    Query                   Q;
+        #    QueryBuildDatasource    QBDS;
+        #    QueryRun                QR;
+        #    DC_PurchConnectionTable DC_PurchConnectionTable;
+        #    ;
+        #    if (Exceptions_ConnectionMap.empty() && IncludeExtra!= '')
+        #    {
+        #        Q = new Query();
+        #        QBDS = Q.addDataSource(tablenum(DC_PurchConnectionTable));
+        #        QBDS.addRange(fieldnum(DC_PurchConnectionTable, DC_ConnectionId)).value(IncludeExtra);
+        #        QR = new QueryRun(Q);
+        #        while (QR.next())
+        #        {
+        #            DC_PurchConnectionTable = QR.get(Tablenum(DC_PurchConnectionTable));
+        #            Exceptions_ConnectionMap.insert(DC_PurchConnectionTable.DC_ConnectionId, '');
+        #        }
+        #    }
+        #    Return Exceptions_ConnectionMap;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #Exceptions_PurchId
+        #Map Exceptions_PurchId()
+        #{
+        #    Query                   Q;
+        #    QueryBuildDatasource    QBDS;
+        #    QueryRun                QR;
+        #    PurchTable              PurchTable;
+        #
+        #    ;
+        #    if (Exceptions_PurchIdMap.empty() && PurchIdRange!= '')
+        #    {
+        #        Q = new Query();
+        #        QBDS = Q.addDataSource(tablenum(PurchTable));
+        #        QBDS.addRange(fieldnum(PurchTable, PurchId)).value(PurchIdRange);
+        #        QR = new QueryRun(Q);
+        #        while (QR.next())
+        #        {
+        #            PurchTable = QR.get(Tablenum(PurchTable));
+        #            Exceptions_PurchIdMap.insert(PurchTable.PurchId, '');
+        #        }
+        #    }
+        #    Return Exceptions_PurchIdMap;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #ExtItemId
+        #ItemId ExtItemId(PurchLine  PurchLine)
+        #{
+        #    CustVendExternalItem    CustVendExternalItem;
+        #    InventDim               InventDim;
+        #    ;
+        #    InventDim = PurchLine.inventDim().data();
+        #    InventDim.clearNotItemDim(PurchLine.inventTable().DimGroupId);
+        #    InventDim = InventDim::findDim(InventDim);
+        #    CustVendExternalItem = CustVendExternalItem::find(ModuleInventPurchSalesVendCustGroup::Vend,PurchLine.ItemId,
+        #                                                      InventDim.inventDimId, Purchline.purchTable().InvoiceAccount);
+        #    Return CustVendExternalItem.ExternalItemId;
+        #}
+      ENDSOURCE
+      SOURCE #FindValueInRecord
+        #// Hvis der står noget bestemt i strengen - så find efterfølgende værdi
+        #// Pos = position for værdien - angivet i antal tegn fra keywords startposition
+        #Str 100 FindValueInRecord(Str DefaultStr, Str RecordStr,Str Keyword, int Pos, int Length)
+        #{
+        #    int KeywordPos;
+        #    Str ReturnValue;
+        #    ;
+        #    if (StrScan(RecordStr,Keyword,1,999))
+        #    {
+        #        KeywordPos = StrScan(RecordStr,Keyword,1,999);
+        #        ReturnValue = SubStr(RecordStr,KeywordPos+Pos-1,Length);
+        #    }
+        #
+        #    Return ReturnValue ? ReturnValue : DefaultStr;
+        #}
+      ENDSOURCE
+      SOURCE #getDGF_KNI_PurchOrderId
+        #PurchaseOrderId getDGF_KNI_PurchOrderId(PurchTable  PurchTable)
+        #{
+        #    PurchaseOrderId     DGF_KNI_PurchOrderId;
+        #    VendPurchOrderJour  VendPurchOrderJour;
+        #    ;
+        #    select reverse firstonly PurchaseOrderId from VendPurchOrderJour order by PurchaseOrderId
+        #        where VendPurchOrderJour.PurchId == PurchTable.PurchId;
+        #     DGF_KNI_PurchOrderId = VendPurchOrderJour.PurchaseOrderId;
+        #     if (!DGF_KNI_PurchOrderId)
+        #     {
+        #        DGF_KNI_PurchOrderId = PurchTable.PurchId+'1';
+        #        if (!Test)
+        #        {
+        #            Warning(StrFmt('Ingen rekvisition udskrevet på indkøb %1. KNI PurchOrder sammensat til %2',PurchTable.PurchId,DGF_KNI_PurchOrderId));
+        #
+        #        }
+        #     }
+        #     Return DGF_KNI_PurchOrderId;
+        #}
+      ENDSOURCE
+      SOURCE #GetExtItemId
+        #ItemId GetExtItemId(PurchLine  PurchLine)
+        #{
+        #    CustVendExternalItem    CustVendExternalItem;
+        #    InventDim               InventDim;
+        #    ;
+        #    InventDim = PurchLine.inventDim().data();
+        #    InventDim.clearNotItemDim(PurchLine.inventTable().DimGroupId);
+        #    InventDim = InventDim::findDim(InventDim);
+        #    CustVendExternalItem = CustVendExternalItem::find(ModuleInventPurchSalesVendCustGroup::Vend,PurchLine.ItemId,
+        #                                                      InventDim.inventDimId, Purchline.purchTable().InvoiceAccount);
+        #    Return CustVendExternalItem.ExternalItemId;
+        #}
+      ENDSOURCE
+      SOURCE #GetFile_PrepareFiles
+        #Map GetFile_PrepareFiles()
+        #{
+        #    Map                         ImportFileMap = new Map(types::String, types::Enum);
+        #    int                         Handle;
+        #    Filepath                    Filepath, EmptyPath;
+        #    Filename                    shortfilename;
+        #    Filename                    FileExt;
+        #    Filename                    ActualFile, NewActualFile;
+        #    DC_IntegrationFiletypeSG    Filetype;
+        #    int                         Err;
+        #    Str 7                       ActualTime;
+        #    int                         Cnt;
+        #    Str 5                       FANumber;
+        #    DC_SGInvoiceHeader          DC_SGInvoiceHeader;
+        #    ;
+        #    WinAPI::setCurrentDirectory(this.SGParm().SG_ImportFilepath);
+        #
+        #    //Omdøb filer der ikke er låst
+        #    ActualFile = this.SGParm().SG_ImportFilepath+this.SGParm().SG_Importfile_Pattern;
+        #    [handle,ActualFile] = WinApi::findFirstFile(this.SGParm().SG_ImportFilepath+this.SGParm().SG_Importfile_Pattern);
+        #    while (ActualFile)
+        #    {
+        #        if (!WinApi::fileLocked(ActualFile))
+        #        {
+        #            NewActualFile = '';
+        #            //TOBEDELETED [filepath,shortfilename,fileExt] = FileNameSplit(this.SGParm().SG_ImportFilepath+ActualFile);
+        #            Filetype = this.IdentifyFiletype(this.SGParm().SG_ImportFilepath+ActualFile);
+        #            while (this.TimeFmt(timenow(),true) == ActualTime)
+        #                sleep(100);
+        #            ActualTime = this.TimeFmt(timenow(),true);
+        #            switch(Filetype)
+        #            {
+        #                case DC_IntegrationFiletypeSG::PurchOrderReceiptFromSG :
+        #                    NewActualFile = this.SGParm().SG_ImportFilepath+this.SGParm().SG_Importfile_ReqReceiptImpPattern;
+        #                    NewActualFile = StrReplace(NewActualFile,'*',this.datefmt(Systemdateget(),true)+ActualTime);
+        #                    break;
+        #                case DC_IntegrationFiletypeSG::PurchInvoiceFromSG :
+        #                    FANumber = this.Identify_FAnumber(this.SGParm().SG_ImportFilepath+ActualFile);
+        #                    select firstonly DC_SGInvoiceHeader where DC_SGInvoiceHeader.SGFileId == FANumber;
+        #                    if (DC_SGInvoiceHeader.RecId && this.SGParm().CheckInvoiceFileDuplicates)
+        #                        throw error(StrFmt('Filen %1 (med FA nummer %2) er allerede indlæst',ActualFile,FANumber));
+        #                    NewActualFile = this.SGParm().SG_ImportFilepath+this.SGParm().SG_Importfile_InvImpPattern;
+        #                    NewActualFile = StrReplace(NewActualFile,'*',this.datefmt(Systemdateget(),true)+ActualTime);
+        #                    break;
+        #            }
+        #            if (NewActualFile)
+        #            {
+        #                if (DoMoveCopyReadfiles == CopyMove::Move)
+        #                    err = WinApi::moveFile(this.SGParm().SG_ImportFilepath+ActualFile,NewActualFile);
+        #                else
+        #                    err = WinApi::copyFile(this.SGParm().SG_ImportFilepath+ActualFile,NewActualFile);
+        #
+        #                ImportFileMap.insert(NewActualFile,Filetype);
+        #                [filepath,shortfilename,fileExt] = FileNameSplit(NewActualFile);
+        #                NewActualFile = shortfilename+fileext;
+        #                info(StrFmt('Flytter importfil fil fra %1 til %2',ActualFile,NewActualFile));
+        #            }
+        #        }
+        #        ActualFile = WinApi::findNextFile(handle);
+        #    }
+        #    if (handle)
+        #        WinApi::closeHandle(handle);
+        #
+        #    Return ImportFileMap;
+        #}
+      ENDSOURCE
+      SOURCE #getFromDialog
+        #public boolean getFromDialog()
+        #{
+        #    Boolean     ret = super();
+        #;
+        #
+        #    Test = DlgTest.value();
+        #    PurchIdRange = DlgPurchIdRange.value();
+        #    InventLocationRange = DlgInventLocationRange.value();
+        #
+        #    DoMakeReqFiles         = DlgDoMakeReqFiles.value();
+        #    DoHandleReadfiles      = DlgDoHandleReadfiles.value();
+        #    DoMoveCopyReadfiles    = DlgDoMoveCopyReadfiles.value();
+        #    DoHandleSGReceiptFiles = DlgDoHandleSGReceiptFiles.value();
+        #    DoHandleSGInvoiceFiles = DlgDoHandleSGInvoiceFiles.value();
+        #    IncludeExtra           = DlgIncludeExtra.value();
+        #    return ret;
+        #}
+      ENDSOURCE
+      SOURCE #GetInvFile
+        #void GetInvFile(filename    filename)
+        #{
+        #    AsciiIO                 AsciiIO;
+        #    FileIOPermission        FileIOPermission;
+        #
+        #    list                    LstFilelines;
+        #    ListIterator            ILstFilelines;
+        #
+        #    Str                     RecordStr;
+        #    DC_SGExternalVoucher    SGExternalVoucher;
+        #    DC_SGInvoiceHeader      DC_SGInvoiceHeader;
+        #    DC_SGInvoiceLine        DC_SGInvoiceLine;
+        #    Container               Line;
+        #    Str 5                   SGFileId;
+        #    ;
+        #
+        #    FileIOPermission = new FileIOPermission(filename,'r');
+        #    FileIOPermission.assert();
+        #
+        #    AsciiIO = new AsciiIO(filename,"r");
+        #    AsciiIO.InFieldDelimiter(';');
+        #    AsciiIO.InRecordDelimiter(Num2Char(13)+Num2Char(10));
+        #    LstFilelines = this.ReadFile(AsciiIO);  //Indlæs linier i LstFilelines
+        #    ILstFilelines = new ListIterator(LstFilelines);
+        #    while (ILstFilelines.more())
+        #    {
+        #        RecordStr = ILstFilelines.value();
+        #        if (SubStr(RecordStr,1,2) == 'FA')
+        #        {
+        #            SGFileId = SubStr(RecordStr,3,5);
+        #        }
+        #
+        #        if (SubStr(RecordStr,1,3) == '...')
+        #        {
+        #            if (SGExternalVoucher)
+        #                SGExternalVoucher = '';  //InvoiceFooter behandles ikke
+        #            else
+        #            {
+        #                //Handle header
+        #                DC_SGInvoiceHeader = This.GetInvFile_HandleHeader(RecordStr, filename, SGFileId);
+        #                SGExternalVoucher = DC_SGInvoiceHeader.SGExternalVoucher;
+        #            }
+        #        }
+        #        else
+        #        {
+        #            //Handle lines
+        #            if (SGExternalVoucher)
+        #                DC_SGInvoiceLine = this.GetInvFile_HandleLine(RecordStr, SGExternalVoucher);
+        #        }
+        #        ILstFilelines.next();
+        #    }
+        #}
+      ENDSOURCE
+      SOURCE #GetInvFile_HandleHeader
+        #DC_SGInvoiceHeader GetInvFile_HandleHeader(Str RecordStr,filename filename, Str 5 SGFileId)
+        #{
+        #    DC_SGInvoiceHeader  DC_SGInvoiceHeader;
+        #    ;
+        #    DC_SGInvoiceHeader.SGFileId             =           SGFileId;
+        #    DC_SGInvoiceHeader.OrigFilename         =           filename;
+        #    DC_SGInvoiceHeader.SGExternalVoucher    =           SubStr(RecordStr, 17,7);
+        #    DC_SGInvoiceHeader.SGOrderId            =           SubStr(RecordStr, 39,6);
+        #    DC_SGInvoiceHeader.RegistrationDate     = Str2Date( SubStr(RecordStr, 46,6),321);
+        #    DC_SGInvoiceHeader.SGCustId             =           SubStr(RecordStr, 73,7);
+        #    DC_SGInvoiceHeader.DueDate              = Str2Date( SubStr(RecordStr, 80,6),321);
+        #    DC_SGInvoiceHeader.ConnectionId         =           SubStr(RecordStr, 86,3);
+        #    DC_SGInvoiceHeader.POnumber_1           =           SubStr(RecordStr, 91,8);
+        #    DC_SGInvoiceHeader.POnumber_2           =           SubStr(RecordStr,100,8);
+        #    DC_SGInvoiceHeader.POnumber_3           =           SubStr(RecordStr,110,8);
+        #    DC_SGInvoiceHeader.POnumber_4           =           SubStr(RecordStr,120,8);
+        #    DC_SGInvoiceHeader.POnumber_5           =           SubStr(RecordStr,130,8);
+        #    DC_SGInvoiceHeader.POnumber_6           =           SubStr(RecordStr,140,8);
+        #    DC_SGInvoiceHeader.POnumber_7           =           SubStr(RecordStr,150,8);
+        #    DC_SGInvoiceHeader.POnumber_8           =           SubStr(RecordStr,160,8);
+        #    DC_SGInvoiceHeader.POnumber_9           =           SubStr(RecordStr,170,8);
+        #    DC_SGInvoiceHeader.POnumber_10          =           SubStr(RecordStr,180,8);
+        #
+        #    DC_SGInvoiceHeader.insert();
+        #    Return DC_SGInvoiceHeader;
+        #}
+      ENDSOURCE
+      SOURCE #GetInvFile_HandleLine
+        #DC_SGInvoiceLine GetInvFile_HandleLine(Str RecordStr, DC_SGExternalVoucher SGExternalVoucher)
+        #{
+        #    DC_SGInvoiceLine  DC_SGInvoiceLine;
+        #    ;
+        #    DC_SGInvoiceLine.SGExternalVoucher  = SGExternalVoucher;
+        #    DC_SGInvoiceLine.ItemBarCode_EAN    =           SubStr(RecordStr,  3,13);
+        #    DC_SGInvoiceLine.ItemBarCode_PLUS   =           SubStr(RecordStr, 16, 6);
+        #    DC_SGInvoiceLine.SGItemId           =           SubStr(RecordStr, 27, 6);
+        #    DC_SGInvoiceLine.ItemName           =           SubStr(RecordStr, 45,25);
+        #    DC_SGInvoiceLine.Factor             = Str2Num(  SubStr(RecordStr, 70, 5));
+        #    DC_SGInvoiceLine.Sign               =           SubStr(RecordStr, 84, 1);
+        #    DC_SGInvoiceLine.Qty                = Str2Num(  SubStr(RecordStr, 85,10));
+        #    DC_SGInvoiceLine.Price              = Str2Num(  SubStr(RecordStr, 95, 9));
+        #    DC_SGInvoiceLine.QtyToWeight        =           SubStr(RecordStr,137, 1);
+        #    DC_SGInvoiceLine.SkipLine           =           SubStr(RecordStr,144, 1);
+        #    DC_SGInvoiceLine.KNIItemId          =           SubStr(RecordStr,165,11);
+        #
+        #    DC_SGInvoiceLine.insert();
+        #    Return DC_SGInvoiceLine;
+        #}
+      ENDSOURCE
+      SOURCE #GetReqFile_Receipt
+        #void GetReqFile_Receipt(filename    filename)
+        #{
+        #    AsciiIO             AsciiIO;
+        #    FileIOPermission    FileIOPermission;
+        #    List                LstFilelines;
+        #    Listiterator        ILstFilelines;
+        #    Str                 RecordStr;
+        #    Str 30              ReferenceNo;
+        #    Str 30              AntalColli;
+        #    Str 30              AntalRecord;
+        #    Str 30              ErrorColli;
+        #    Str 30              ErrorRecord;
+        #    int                 Pos;
+        #    ;
+        #
+        #
+        #    FileIOPermission = new FileIOPermission(filename,'r');
+        #    FileIOPermission.assert();
+        #
+        #    AsciiIO = new AsciiIO(filename,"r");
+        #    AsciiIO.InFieldDelimiter(';');
+        #    AsciiIO.InRecordDelimiter(Num2Char(13)+Num2Char(10));
+        #    //info(StrFmt('Læser kvitteringsfil for SGrekv: %1',filename));
+        #
+        #    LstFilelines = this.ReadFile(AsciiIO);
+        #    ILstFilelines = new ListIterator(LstFilelines);
+        #    while (ILstFilelines.more())
+        #    {
+        #        RecordStr   = ILstFilelines.value();
+        #        ReferenceNo = this.FindValueInRecord(ReferenceNo,RecordStr, 'Referencenr',14,7);
+        #        AntalColli  = StrLRTrim(this.FindValueInRecord(AntalColli,RecordStr,  'Antal kolli:'     ,14,10));
+        #        AntalRecord = StrLRTrim(this.FindValueInRecord(AntalRecord,RecordStr, 'Antal records:'   ,16,10));
+        #        ErrorRecord  = StrLRTrim(this.FindValueInRecord(ErrorRecord,RecordStr, 'Antal fejl:'      ,13,10));
+        #        ErrorColli = StrLRTrim(this.FindValueInRecord(ErrorColli,RecordStr,  'Antal fejl kolli:',19,10));
+        #        ILstFilelines.next();
+        #    }
+        #    DC_Integration_FileLog::UpdateStatus_SGReceiptFile(ReferenceNo, Str2int(AntalColli), Str2int(AntalRecord),LogId);
+        #    if (Str2Num(ErrorColli) || Str2Num(ErrorRecord))
+        #    {
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Antal kolli: %1'       ,AntalColli),LogId,SysInfologLevel::None,'SGIntegration');
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Antal records: %1'     ,AntalRecord),LogId,SysInfologLevel::None,'SGIntegration');
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Antal fejl: %1'        ,ErrorRecord),LogId,SysInfologLevel::None,'SGIntegration');
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Antal fejl kolli: %1'  ,ErrorColli),LogId,SysInfologLevel::None,'SGIntegration');
+        #    }
+        #}
+        #
+      ENDSOURCE
+      SOURCE #GetSGCustId
+        #Str 10 GetSGCustId(PurchTable   PurchTable)
+        #{
+        #    DC_SGAccountConvTable   DC_SGAccountConvTable;
+        #    InventTable             InventTable;
+        #    PurchLine               PurchLIne;
+        #    DC_PurchConnectionTable DC_PurchConnectionTable = DC_PurchConnectionTable::find(PurchTable.DC_ConnectionId);
+        #    ;
+        #    select firstonly PurchLIne
+        #        where PurchLine.PurchId == PurchTable.PurchId
+        #        join inventTable where InventTable.ItemId == PurchLine.ItemId;
+        #
+        #    // Find SG CustomerAccount
+        #    //InventLocationId = InventDim::find(PurchLine.InventDimId).InventLocationId;
+        #    select firstonly DC_SGAccountConvTable
+        #        where DC_SGAccountConvTable.InventLocationId == PurchTable.InventLocationId
+        #        &&    DC_SGAccountConvTable.DlvModeId == PurchTable.DlvMode
+        #        &&    DC_SGAccountConvTable.InventPackingCode == InventTable.DC_InventPackingCode;
+        #    if (!DC_SGAccountConvTable)
+        #    {
+        #        if (DC_PurchConnectionTable.DC_ShipmentType == DC_ShipmentType::Air)
+        #            PurchTable.DlvMode = 'Luftfragt';
+        #        else
+        #            PurchTable.DlvMode = 'Skib';
+        #        select firstonly DC_SGAccountConvTable
+        #            where DC_SGAccountConvTable.InventLocationId == PurchTable.InventLocationId
+        #            &&    DC_SGAccountConvTable.DlvModeId == PurchTable.DlvMode
+        #            &&    DC_SGAccountConvTable.InventPackingCode == InventTable.DC_InventPackingCode;
+        #        if (!DC_SGAccountConvTable)
+        #        {
+        #            DC_PurchConsolidateLog::Writelog(StrFmt('SG kontonummer kan ikke findes for lagersted %1, Leveringsmåde %2, Pakkekode %3 - Indk.ordre %4',
+        #                            PurchTable.InventLocationId,PurchTable.DlvMode, InventTable.DC_InventPackingCode,PurchTable.PurchId),LogId,SysInfologLevel::Error,'SGIntegration');
+        #        }
+        #    }
+        #    Return DC_SGAccountConvTable.AccountNum;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #Identify_FAnumber
+        #Str 5 Identify_FAnumber(filename  filename)
+        #{
+        #    Container                   c;
+        #    int                         RecordCount;
+        #    Str                         RecordStr;
+        #    AsciiIO                     AsciiIO;
+        #    FileIOPermission            FileIOPermission;
+        #    Boolean                     Found;
+        #    Str 5                       FANumber;
+        #    ;
+        #    FileIOPermission = new FileIOPermission(filename,'r');
+        #    FileIOPermission.assert();
+        #
+        #    AsciiIO = new AsciiIO(filename,"r");
+        #    AsciiIO.InFieldDelimiter(';');
+        #    AsciiIO.InRecordDelimiter(Num2Char(13)+Num2Char(10));
+        #
+        #    while (AsciiIO.status()==IO_Status::Ok && !Found)
+        #    {
+        #        c = AsciiIO.read();
+        #        RecordStr = Conpeek(c,1);
+        #        if (SubStr(RecordStr,1,2) == 'FA')
+        #        {
+        #            FANumber = SubStr(RecordStr,3,5);
+        #            Break;
+        #        }
+        #        RecordCount++;
+        #    }
+        #    Return FANumber;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #IdentifyFiletype
+        #DC_IntegrationFileTypeSG IdentifyFiletype(filename  filename)
+        #{
+        #    Container                   c;
+        #    int                         RecordCount;
+        #    Str                         RecordStr;
+        #    AsciiIO                     AsciiIO;
+        #    FileIOPermission            FileIOPermission;
+        #    Boolean                     Found;
+        #    DC_IntegrationFileTypeSG    Filetype;
+        #    ;
+        #    FileIOPermission = new FileIOPermission(filename,'r');
+        #    FileIOPermission.assert();
+        #
+        #    AsciiIO = new AsciiIO(filename,"r");
+        #    AsciiIO.InFieldDelimiter(';');
+        #    AsciiIO.InRecordDelimiter(Num2Char(13)+Num2Char(10));
+        #
+        #    while (AsciiIO.status()==IO_Status::Ok && !Found)
+        #    {
+        #        c = AsciiIO.read();
+        #        RecordStr = Conpeek(c,1);
+        #        if (StrScan(RecordStr,'Transmissions Kvittering',1,999))
+        #        {
+        #            Filetype = DC_IntegrationFiletypeSG::PurchOrderReceiptFromSG;
+        #            break;
+        #        }
+        #
+        #        Switch(substr(RecordStr,1,2))
+        #        {
+        #            case 'FA' : Filetype = DC_IntegrationFileTypeSG::PurchInvoiceFromSG; break;
+        #        }
+        #        RecordCount++;
+        #    }
+        #    Return Filetype;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #MakeReqFile
+        #void MakeReqFile()
+        #{
+        #    AsciiIO                 AsciiIO;
+        #    FileIOPermission        FileIOPermission;
+        #//    DC_ReferenceNum         RefNum;
+        #    List                    LstFilelines = new List(types::String);
+        #    List                    LstFilelinesInternal = new List(types::String);
+        #    filename                SG_ReqFile;
+        #    filename                SG_ReqFileInternal;
+        #    Str 30                  NumSeqValue;
+        #    NumberSeq               NumberSeq;
+        #    RCMSupPurchOrder_Post   DC_RCMSupPurchOrder_Post;
+        #    QueryRun                QR;
+        #    QueryBuildDatasource    QBDS;
+        #    Map                     POUpdated;
+        #    MapIterator             IPOUPdated;
+        #    PurchId                 PurchId;
+        #    VendPurchOrderJour      VendPurchOrderJour;
+        #    PurchTable              PurchTable;
+        #    Container               Con;
+        #    Str 60                  FileCounter;
+        #    int                     PurchCount;
+        #    ;
+        #    Exceptions_ConnectionMap = new Map(Types::String, Types::String);
+        #    Exceptions_PurchIdMap = new Map(Types::String, Types::String);
+        #
+        #    this.MakeReqFile_Header(LstFilelines);
+        #    POUpdated = this.MakeReqFile_LoopPurchTable(LstFilelines, LstFilelinesInternal);
+        #    this.MakeReqFile_Footer(LstFilelines);
+        #
+        #    NumberSeq = NumberSeq::newGetNumFromCode(this.SGParm().NumSeq_ReqFile);
+        #    FileCounter = numberSeq.num();
+        #    DC_FileRefId = Num2Str0(Str2Num(FileCounter),6);
+        #    SG_ReqFile = this.SGParm().SG_ExportFilepath+this.SGParm().SG_ReqFile_Pattern;
+        #    SG_ReqFile = StrReplace(SG_ReqFile,'*', DC_FileRefId);
+        #    SG_ReqFileInternal = this.SGParm().SG_ExportFilepath+this.SGParm().SG_ReqFile_Pattern;
+        #    SG_ReqFileInternal = StrReplace(SG_ReqFileInternal,'*', DC_FileRefId+'_InternalKNI');
+        #
+        #    // *** WRITE EXPORTFILE *********
+        #    this.WriteFile(SG_ReqFile, LstFilelines); //Write export file
+        #    this.WriteFile(SG_ReqFileInternal, LstFilelinesInternal); //Write export file
+        #    DC_PurchConsolidateLog::Writelog(StrFmt('Skriver rekv.fil %1',SG_ReqFile), LogId,SysInfologLevel::None,'SGIntegration');
+        #    IPOUpdated = new MapIterator(POUpdated);
+        #    while (IPOUpdated.more())
+        #    {
+        #        PurchId = IPOUpdated.key();
+        #        Con += [PurchId];
+        #        IPOUpdated.next();
+        #        PurchCount++;
+        #
+        #    }
+        #    if (colli)
+        #    {
+        #        DC_Integration_FileLog::CreateNewFile(SG_ReqFile,DC_IntegrationFiletypeSG::PurchOrderToSG,[colli,lines],DC_FileRefId,Con);
+        #
+        #        // *** SENDMAIL *********
+        #        if (!test)
+        #        {
+        #            if (DC_DevTools::AOS_KNIDrift())
+        #            {
+        #                DC_SysMailer::sendMail('Supergros','da','grordre@norddata.dk','llu@lundpartner.dk,Soren_Bjerregaard_Jensen@supergros.dk',null,SG_ReqFile); //'\\\\fileserver\\Faelles\\Supergros\\prisliste 2.txt');
+        #                DC_SysMailer::sendMail('SG_Intern','da','qrd@kni.gl','bbj@kni.gl,llu@lundpartner.dk',null,SG_ReqFileInternal); //'\\\\fileserver\\Faelles\\Supergros\\prisliste 2.txt');
+        #
+        #            }
+        #            // *** UPDATE VendPurchORderJour - DC_SGShipped *********
+        #            IPOUpdated = new MapIterator(POUpdated);
+        #            while (IPOUpdated.more())
+        #            {
+        #                PurchId = IPOUpdated.key();
+        #                if (!Test)
+        #                {
+        #                    Update_recordset VendPurchOrderJour setting DC_SGShipped = Systemdateget()
+        #                        where VendPurchOrderJour.PurchId == PurchId
+        #                        &&    VendPurchOrderJour.DC_SGShipped == datenull();
+        #                    Update_recordset PurchTable setting DC_SGShipped = Systemdateget()
+        #                        where PurchTable.PurchId == PurchId;
+        #                }
+        #                else
+        #                {
+        #                    DC_PurchConsolidateLog::Writelog(StrFmt('Her burde indkøb %1 blive opdateret som afsendt til supergros - men det er kodemæssigt fjernet under testen',PurchId),LogId,SysInfologLevel::Warning,'SGIntegration');
+        #                }
+        #                IPOUpdated.next();
+        #            }
+        #            DC_Integration_FileLog::UpdateStatus(DC_FileRefId,DC_Integration_FileLogStatus::Sent);
+        #        }
+        #        else
+        #            if (DC_DevTools::AOS_KNITest())
+        #                DC_SysMailer::sendMail('Supergros','da','llu@lundpartner.dk','',null,SG_ReqFile); //'\\\\fileserver\\Faelles\\Supergros\\prisliste 2.txt');
+        #            if (DC_DevTools::AOS_DC_UDV())
+        #                info('Mail er udkoblet i udviklingsmiljøet');
+        #    }
+        #    else
+        #    {
+        #        DC_PurchConsolidateLog::Writelog(StrFmt('Filen %1 er ikke dannet og afsendt, da den er tom',SG_ReqFile),LogId,SysInfologLevel::Error,'SGIntegration');
+        #    }
+        #    DC_SysMailer::sendMail('Indk_Sys','da','llu@lundpartner.dk','',this.MakeReqFile_SystemInfo(PurchCount),''); //'\\\\fileserver\\Faelles\\Supergros\\prisliste 2.txt');
+        #}
+        #
+      ENDSOURCE
+      SOURCE #MakeReqFile_Footer
+        #void MakeReqFile_Footer(List LstFilelines)
+        #{
+        #    Str     TxtLine;
+        #    ;
+        #    TxtLine = 'KNI'
+        #            + Fileshipdate
+        #            + Fileshiptime
+        #            + '0000'
+        #            + Num2Str0(lines,5)
+        #            + Num2Str0(colli,6);
+        #    TxtLine = StrLFix(TxtLine,82);
+        #    LstFilelines.addEnd(TxtLine);
+        #    DC_PurchConsolidateLog::Writelog(Strfmt('Export af rekv. til supergros - Linier %1, kolli %2',lines, colli),LogId,SysInfologLevel::None,'SGIntegration');
+        #
+        #}
+      ENDSOURCE
+      SOURCE #MakeReqFile_Header
+        #void MakeReqFile_Header(List LstFilelines)
+        #{
+        #    Str     TxtLine;
+        #    ;
+        #    Fileshipdate = this.DateFmt(systemdateget());
+        #    Fileshiptime = this.TimeFmt(timenow());
+        #    TxtLine = 'KNI'
+        #            + Fileshipdate
+        #            + Fileshiptime
+        #            + '0000';
+        #    TxtLine = StrLFix(TxtLine,82);
+        #    LstFilelines.addEnd(TxtLine);
+        #}
+      ENDSOURCE
+      SOURCE #MakeReqFile_LoopPurchLines
+        #Void MakeReqFile_LoopPurchLines(List LstFilelines, List LstFilelinesInternal,PurchTable PurchTable)
+        #{
+        #    Str                 TxtLine;
+        #    PurchLine           PurchLine;
+        #    VendPurchOrderJour  VendPurchOrderJour;
+        #    int64                 RecordCount,RecordCountMax;
+        #    Str                 InfoStr;
+        #
+        #    ;
+        #    while select PurchLine order by LineNum
+        #            where PurchLine.PurchId == PurchTable.PurchId
+        #    {
+        #        RecordCount++;
+        #        _progress.setCount(RecordCount);
+        #        _progress.setText('PurchId '+PurchTable.PurchId + ' -Linenum:'+Num2str(PurchLine.LineNum,0,4,0,0));
+        #        InfoStr = strfmt('%1;%2;%3;%4;%5;%6;%7;%8;%9',RecordCount,
+        #                                            PurchTable.PurchId,
+        #                                            PurchTable.InvoiceAccount+' '+VendTable::find(PurchTable.InvoiceAccount).Name,
+        #                                            PurchTable.DC_ConnectionId,
+        #                                            PurchTable.InventLocationId,
+        #                                            PurchLine.LineNum,
+        #                                            PurchLine.ItemId+' '+InventTable::find(PurchLine.ItemId).ItemName,
+        #                                            PurchLIne.QtyOrdered,
+        #                                            PurchLine.LineAmount);
+        #        LstFilelinesInternal.addEnd(InfoStr);
+        #
+        #        DC_PurchConsolidateLog::Writelog(Date2Str(SystemDateGet(),123,2,2,2,2,2)+' '+Time2Str(TimeNow(),1,1)+(Test ? ' TEST only;' : ';') + InfoStr,LogId,SysInfologLevel::None,'SGIntegration');
+        #
+        #        if (PurchLine.QtyOrdered>0)
+        #            this.MakeReqFile_Writeline(LstFilelines, PurchTable, PurchLine);
+        #    }
+        #}
+      ENDSOURCE
+      SOURCE #MakeReqFile_LoopPurchTable
+        #Map MakeReqFile_LoopPurchTable(List LstFilelines, List LstFilelinesInternal)
+        #{
+        #    Str                 TxtLine;
+        #    PurchTable          PurchTable;
+        #    PurchLine           PurchLine;
+        #    VendTable           VendTable;
+        #    VendPurchOrderJour  VendPurchOrderJour,VendPurchOrderJour2;
+        #    int                 RecordCount,RecordCountMax;
+        #    Range               PORange;
+        #    Map                 POUpdated = new Map(Types::String,Types::String);
+        #    MapIterator         IPOUpdated;
+        #    Boolean             PrintInfo = True;
+        #    Query                   Q;
+        #    QueryBuildDatasource    QBDS;
+        #    QueryRun                QR;
+        #
+        #    ;
+        #    this.Exceptions_ConnectionMap();
+        #    this.Exceptions_PurchId();
+        #    if (!Test)
+        #        this.MakeReqFile_UpdateRequisitions();
+        #    Q = new Query();
+        #    QBDS = Q.addDataSource(tablenum(VendTable));
+        #    QBDS.addRange(fieldnum(VendTable, DC_IntegrationType)).value(queryValue(DC_IntegrationType::Supergros));
+        #    QBDS = QBDS.addDataSource(tablenum(PurchTable));
+        #    QBDS.addlink(fieldnum(VendTable, AccountNum),fieldnum(PurchTable,InvoiceAccount));
+        #    QBDS.addRange(fieldnum(PurchTable,PurchStatus)).value(queryValue(PurchStatus::Backorder));
+        #    QBDS.addRange(fieldnum(PurchTable,DC_SGShipped)).value(queryValue(datenull()));
+        #    if (PurchIdRange)
+        #        QBDS.addRange(fieldnum(PurchTable,PurchId)).value(PurchIdRange);
+        #    else
+        #        QBDS.addRange(fieldnum(PurchTable,PurchId)).value('70000001..');
+        #    if (InventLocationRange && !PurchIdRange)
+        #        QBDS.addRange(fieldnum(PurchTable,InventLocationId)).value(InventLocationRange);
+        #
+        #    if (!Test)
+        #    {
+        #        QBDS = QBDS.addDataSource(tablenum(VendPurchOrderJour));
+        #        QBDS.addLink(fieldnum(PurchTable,PurchId),fieldnum(VendPurchOrderJOur,PurchId));
+        #        QBDS.joinMode(JoinMode::ExistsJoin);
+        #        QBDS.addRange(fieldnum(VendPurchOrderJour,DC_SGShipped)).value(queryvalue(datenull()));
+        #    }
+        #    QR = New QueryRun(Q);
+        #
+        #    RecordCountMax = SysQuery::countTotal(QR);
+        #
+        #    _progress = new sysOperationProgress();
+        #    _progress.setCaption("Eksport indkøbsordrer til Supergros");
+        #    _progress.setAnimation(#AviUpdate);
+        #    _progress.setTotal(RecordCountMax);
+        #    RecordCount = 0;
+        #    LstFilelinesInternal.addEnd(strfmt('Counter;Indkøbsordre;Kreditor;forbindelse;Lagersted;Linienr;Varenr;Antal;Liniebeløb'));
+        #
+        #    while (QR.next())
+        #    {
+        #        PurchTable = QR.get(tablenum(PurchTable));
+        #        RecordCount++;
+        #        _progress.setCount(RecordCount);
+        #        _progress.setText('PurchId '+PurchTable.PurchId);
+        #
+        #        if (this.CheckPurchTableErrors(PurchTable))
+        #        {
+        #            this.MakeReqFile_LoopPurchLines(LstFilelines,LstFilelinesInternal,PurchTable);
+        #            if (!POUpdated.exists(PurchTable.PurchId))
+        #                POUpdated.insert(PurchTable.PurchId,'');
+        #        }
+        #    }
+        #    Return POUpdated;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #MakeReqFile_SystemInfo
+        #Map MakeReqFile_SystemInfo(int PurchCount)
+        #{
+        #    DC_PurchConnectionTable Connection;
+        #    Str                     EmailStr;
+        #    Map                     EmailMap = new Map(Types::String,Types::String);
+        #    ;
+        #    select Connection where Connection.LastOrderDate == SystemDateGet()-1;
+        #    EmailStr += StrFmt('Indkøb afsendt %1 (Linier %2)    ',PurchCount,Lines);
+        #    if (PurchIdRange)
+        #        EmailStr = StrFmt('Indkøbsafgrænsning: %1   ',PurchIdRange);
+        #    else
+        #        EmailStr += StrFmt('Aktuel forbindelse %1 - har sidste bestillingsdato %2 ',Connection.DC_ConnectionId, Connection.LastOrderDate);
+        #    if (IncludeExtra)
+        #        EmailStr = StrFmt('Ekstra forbindelser: %1   ',IncludeExtra);
+        #    EmailStr += 'Nærliggende forbindelser   ';
+        #    while select Connection where Connection.LastOrderDate >= SystemDateGet()-5 && Connection.LastOrderDate <= SystemDateGet()+5
+        #    {
+        #        EmailStr += StrFmt('%1 (%2)  ;',Connection.DC_ConnectionId, Connection.LastOrderDate);
+        #    }
+        #
+        #
+        #
+        #    EmailMap.insert('Header',StrFmt('IntegrationSG Lines %1',Lines));
+        #    EmailMap.insert('Content',EmailStr);
+        #
+        #    Return EmailMap;
+        #}
+      ENDSOURCE
+      SOURCE #MakeReqFile_UpdateRequisitions
+        #void MakeReqFile_UpdateRequisitions()
+        #{
+        #    Query                   Q;
+        #    QueryBuildDatasource    QBDS;
+        #    QueryRun                QR;
+        #    PurchTable              PurchTable;
+        #    DC_PurchConnectionTable DC_PurchConnectionTable;
+        #    args                    _args;
+        #    int                     RecordCount, RecordCountMax;
+        #
+        #    DC_PurchConsolidateLog  DC_PurchConsolidateLog;
+        #    ;
+        #    this.Exceptions_ConnectionMap();
+        #
+        #    Q = new Query();
+        #    QBDS = Q.addDataSource(tablenum(VendTable));
+        #    QBDS.addRange(fieldnum(VendTable, DC_IntegrationType)).value(queryValue(DC_IntegrationType::Supergros));
+        #    QBDS = QBDS.addDataSource(tablenum(PurchTable));
+        #    QBDS.addlink(fieldnum(VendTable, AccountNum),fieldnum(PurchTable,InvoiceAccount));
+        #    QBDS.addRange(fieldnum(PurchTable,PurchStatus)).value(queryValue(PurchStatus::Backorder));
+        #    QBDS.addRange(fieldnum(PurchTable,DC_SGShipped)).value(queryValue(datenull()));
+        #    if (PurchIdRange)
+        #        QBDS.addRange(fieldnum(PurchTable,PurchId)).value(PurchIdRange);
+        #    else
+        #        QBDS.addRange(fieldnum(PurchTable,PurchId)).value('70000001..');
+        #    if (InventLocationRange && !PurchIdRange)
+        #        QBDS.addRange(fieldnum(PurchTable,InventLocationId)).value(InventLocationRange);
+        #
+        #    QBDS = QBDS.addDataSource(tablenum(VendPurchOrderJour));
+        #    QBDS.addLink(fieldnum(PurchTable,PurchId),fieldnum(VendPurchOrderJour,PurchId));
+        #    QBDS.joinMode(JoinMode::NoExistsJoin);
+        #
+        #    QR = new QueryRun(Q);
+        #    RecordCountMax = SysQuery::countTotal(QR);
+        #
+        #    _progress = new sysOperationProgress();
+        #    _progress.setCaption("Opdatering af indk.rekvisitioner til Supergros");
+        #    _progress.setAnimation(#AviUpdate);
+        #    _progress.setTotal(RecordCountMax);
+        #    RecordCount = 0;
+        #    ttsbegin;
+        #    while (QR.next())
+        #    {
+        #        PurchTable = QR.get(tablenum(PurchTable));
+        #        RecordCount++;
+        #        _progress.setCount(RecordCount);
+        #
+        #        DC_PurchConnectionTable = DC_PurchConnectionTable::find(PurchTable.DC_ConnectionId);
+        #        if (DC_PurchConnectionTable.LastOrderDate == SystemDateGet()-1 || Exceptions_ConnectionMap.exists(PurchTable.DC_ConnectionId) ||  Exceptions_PurchIdMap.exists(PurchTable.purchid))
+        #        {
+        #            if (this.CheckPurchTableErrors(PurchTable))
+        #            {
+        #                _progress.setText('PurchId '+PurchTable.PurchId);
+        #                select firstonly forupdate DC_PurchConsolidateLog
+        #                    where DC_PurchConsolidateLog.ID == LogId
+        #                    &&    DC_PurchConsolidateLog.Description like 'Rekvisionsopdaterer*';
+        #                DC_PurchConsolidateLog.ID = LogId;
+        #                DC_PurchConsolidateLog.Description = StrFmt('Rekvisionsopdaterer indkøb %1');
+        #                DC_PurchConsolidateLog.write();
+        #
+        #                _Args = new Args();
+        #                _Args.parm(PurchTable.PurchId);
+        #                DC_RCMSupPurchOrder_Post::main(_Args);
+        #            }
+        #        }
+        #        if (DC_PurchConnectionTable.LastOrderDate < SystemDateGet()-1 && !Exceptions_ConnectionMap.exists(PurchTable.DC_ConnectionId) && !Exceptions_PurchIdMap.exists(PurchTable.PurchId) )
+        #        {
+        #            DC_PurchConsolidateLog::Writelog(StrFmt('Indkøb %1 har overskredet sidste bestillingsdato for forbindelse %1 og er derfor ikke rekvisitions opdateret til SG',PurchTable.PurchId),LogId,SysInfologLevel::Error,'SGIntegration');
+        #        }
+        #    }
+        #    select firstonly forupdate DC_PurchConsolidateLog
+        #        where DC_PurchConsolidateLog.ID == LogId
+        #        &&    DC_PurchConsolidateLog.Description like 'Rekvisionsopdaterer*';
+        #    DC_PurchConsolidateLog.delete();
+        #    ttscommit;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #MakeReqFile_Writeline
+        #void MakeReqFile_Writeline(List LstFilelines, PurchTable PurchTable,PurchLine PurchLine)
+        #{
+        #    Str                         TxtLine;
+        #    InventTable                 InventTable;
+        #    InventTableModule           InventTableModule;
+        #    DC_InventPackingCodeTable   DC_InventPackingCodeTable;
+        #    DC_PurchConnectionTable     DC_PurchConnectionTable;
+        #    Real                        ColliQty;
+        #    Str 7                       DGFCustId;
+        #    Str 8                       DGF_KNI_PurchOrderId;
+        #
+        #    Str 20                      ConnectionDate;
+        #    Str 3                       SG_ConnectionId;
+        #    ;
+        #    //InventTable = InventTable::find(PurchLine.ItemId);
+        #
+        #    select firstonly DC_InventPackingCode from InventTable
+        #        where InventTable.ItemId == PurchLine.ItemId
+        #        join Quantity from InventTableModule
+        #            where InventTableModule.ItemId == InventTable.ItemId
+        #            &&    InventTableModule.ModuleType == ModuleInventPurchSales::Purch
+        #        join DC_DlvShip_LastDate_Offset from DC_InventPackingCodeTable
+        #            where DC_InventPackingCodeTable.InventPackingCode == InventTable.DC_InventPackingCode ;
+        #
+        #    DC_PurchConnectionTable = DC_PurchConnectionTable::find(PurchTable.DC_ConnectionId);
+        #    ColliQty = PurchLine.QtyOrdered / (InventTableModule.Quantity ? InventTableModule.Quantity : 1);
+        #    ColliQty += 0.499999;
+        #    ColliQty = DecRound(ColliQty,0);
+        #
+        #    // er transporten skib eller fly
+        #    if (DC_PurchConnectionTable.Air == NoYes::Yes)
+        #        DC_PurchConnectionTable.DC_ShipmentType = DC_ShipmentType::Air;
+        #
+        #    // find sidste indleveringsdato - og for fly også en connectiondate
+        #    // Hvis Skib, skal der tages højde for varegruppens offset dage - det skal der IKKE ved fly
+        #    // Hvis fly skal connectiondate (afgang fra kastrup) udfyldes - og den er altid dagen efter "sidste indleveringsdato"
+        #    if (DC_PurchConnectionTable.DC_ShipmentType == DC_ShipmentType::Air)
+        #        ConnectionDate = date2str(DC_PurchConnectionTable.DeliverToShip_LastDate + 1,123,2,0,2,0,2);
+        #    else
+        #        DC_PurchConnectionTable.DeliverToShip_LastDate = DC_PurchConnectionTable.DeliverToShip_LastDate + DC_InventPackingCodeTable.DC_DlvShip_LastDate_Offset;
+        #
+        #    // Find SG CustomerAccount
+        #    DGFCustId = this.GetSGCustId(PurchTable);
+        #    if (!DGFCustId)
+        #        Return;
+        #
+        #    DGF_KNI_PurchOrderId = this.getDGF_KNI_PurchOrderId(PurchTable);
+        #    SG_ConnectionId = SubStr(PurchTable.DC_ConnectionId,StrLen(PurchTable.DC_ConnectionId)-3,3);
+        #
+        #    TxtLine = StrRFix(  DGFCustId,7,'0')
+        #            + StrRFix(DGF_KNI_PurchOrderId,10,'0')
+        #            + date2str(DC_PurchConnectionTable.DeliverToShip_LastDate,123,2,0,2,0,2)
+        #            + StrRFix(  SG_ConnectionId,3,'0')
+        #            + StrRFix(  this.GetExtItemId(PurchLine),6,'0')
+        #            + num2str0( ColliQty ,6)
+        #            + num2str0( Str2Num(InventTable.DC_InventPackingCode),2)
+        #            + '0'
+        #            + StrRep('0',6)
+        #            + StrRep('0',14)
+        #            + StrRep('0',14)
+        #            + StrLFix(DC_PurchConnectionTable.DC_ShipmentType == DC_ShipmentType::Air ? '2' : '1',1)
+        #            + StrLFix(ConnectionDate,6,'0')
+        #            ;
+        #    Colli += ColliQty;
+        #    Lines += 1;
+        #    TxtLine = StrLFix(TxtLine,82);
+        #    LstFilelines.addEnd(TxtLine);
+        #
+        #    DC_Integration_FileLogTrans::WriteLog(DC_FileRefId,PurchTable, PurchLine,TxtLine);
+        #}
+        #
+      ENDSOURCE
+      SOURCE #pack
+        #public container pack()
+        #{
+        #    return [#CurrentVersion,#CurrentList];
+        #}
+      ENDSOURCE
+      SOURCE #run
+        #void run()
+        #{
+        #    Map                         ImportFileMap = new Map(Typeid(Filename), types::Enum);
+        #    MapIterator                 IImportFileMap;
+        #    DC_IntegrationFiletypeSG    Filetype;
+        #    ;
+        #    LogID = DC_PurchConsolidateLog::NextLogId();
+        #    if (DoMakeReqFiles)
+        #        this.MakeReqFile();
+        #
+        #    if (DoHandleReadfiles)
+        #    {
+        #        ImportFileMap = this.GetFile_PrepareFiles();    //Rename'er filer og sætter filnavne ind i en list.
+        #        IImportFileMap = new MapIterator(ImportFileMap);
+        #        while (IImportFileMap.more())
+        #        {
+        #            //info(StrFmt('reading %1 (type %2)',IImportFileMap.key(),IImportFileMap.value()));
+        #            Switch(IImportFileMap.value())
+        #            {
+        #                case DC_IntegrationFiletypeSG::PurchOrderReceiptFromSG  : if (DoHandleSGReceiptFiles)
+        #                                                                                this.GetReqFile_Receipt(IImportFileMap.key());
+        #                                                                          break;
+        #                case DC_IntegrationFiletypeSG::PurchInvoiceFromSG       : if (DoHandleSGInvoiceFiles)
+        #                                                                                this.GetInvFile(IImportFileMap.key());
+        #                                                                          break;
+        #            }
+        #
+        #            IImportFileMap.next();
+        #        }
+        #    }
+        #
+        #}
+      ENDSOURCE
+      SOURCE #TimeFmt
+        #Str 4 TimeFmt(Int  transTime,boolean InclSeconds = False)
+        #{
+        #    Str 10  ConvTime = Time2Str(transTime,0,0);
+        #    Return SubStr(ConvTime,1,2)+SubStr(ConvTime,4,2)+(InclSeconds ? SubStr(ConvTime,7,2) : '');
+        #}
+      ENDSOURCE
+      SOURCE #unpack
+        #public boolean unpack(container packedClass)
+        #{
+        #    Version version = RunBase::getVersion(packedClass);
+        #;
+        #    switch (version)
+        #    {
+        #        case #CurrentVersion:
+        #            [version,#CurrentList] = packedClass;
+        #            break;
+        #        default:
+        #            return false;
+        #    }
+        #
+        #    return true;
+        #}
+      ENDSOURCE
+      SOURCE #description
+        #// Here goes a description of the class
+        #static ClassDescription description()
+        #{
+        #    return "Integration Supergros";
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #client static void main(Args args)
+        #{
+        #    DC_Integration    DC_Integration;
+        #;
+        #    DC_Integration = DC_Integration::construct('SG');
+        #
+        #    if (DC_Integration.prompt())
+        #        DC_Integration.runBasis();
+        #}
+        #
+      ENDSOURCE
+      SOURCE #PurchExcept
+        #Static Map PurchExcept()
+        #{
+        #    Map PurchIdMap = new Map(Types::String,Types::String);
+        #    ;
+        #    PurchIdMap.insert('70000015','05-11-2008');
+        #    PurchIdMap.insert('70000016','05-11-2008');
+        #    PurchIdMap.insert('70000017','05-11-2008');
+        #    PurchIdMap.insert('70000036','05-11-2008');
+        #    PurchIdMap.insert('70000037','05-11-2008');
+        #    PurchIdMap.insert('70000038','05-11-2008');
+        #    PurchIdMap.insert('70000039','05-11-2008');
+        #    PurchIdMap.insert('70000041','05-11-2008');
+        #    PurchIdMap.insert('70000042','05-11-2008');
+        #    PurchIdMap.insert('70000044','05-11-2008');
+        #    PurchIdMap.insert('70000045','05-11-2008');
+        #    PurchIdMap.insert('70000046','05-11-2008');
+        #    PurchIdMap.insert('70000047','05-11-2008');
+        #    PurchIdMap.insert('70000048','05-11-2008');
+        #    PurchIdMap.insert('70001548','05-11-2008');
+        #    PurchIdMap.insert('70001736','05-11-2008');
+        #    PurchIdMap.insert('70002050','05-11-2008');
+        #    PurchIdMap.insert('70002051','05-11-2008');
+        #    PurchIdMap.insert('70002052','05-11-2008');
+        #    PurchIdMap.insert('70002053','05-11-2008');
+        #    PurchIdMap.insert('70002054','05-11-2008');
+        #    PurchIdMap.insert('70002055','05-11-2008');
+        #    PurchIdMap.insert('70002056','05-11-2008');
+        #    PurchIdMap.insert('70002057','05-11-2008');
+        #    PurchIdMap.insert('70002058','05-11-2008');
+        #    PurchIdMap.insert('70002059','05-11-2008');
+        #    PurchIdMap.insert('70002064','05-11-2008');
+        #    PurchIdMap.insert('70002069','05-11-2008');
+        #    PurchIdMap.insert('70002070','05-11-2008');
+        #    PurchIdMap.insert('70002144','05-11-2008');
+        #    PurchIdMap.insert('70002145','05-11-2008');
+        #    PurchIdMap.insert('70002146','05-11-2008');
+        #    PurchIdMap.insert('70002147','05-11-2008');
+        #    PurchIdMap.insert('70002148','05-11-2008');
+        #    PurchIdMap.insert('70002149','05-11-2008');
+        #    PurchIdMap.insert('70002150','05-11-2008');
+        #    PurchIdMap.insert('70002151','05-11-2008');
+        #    PurchIdMap.insert('70002152','05-11-2008');
+        #    PurchIdMap.insert('70002153','05-11-2008');
+        #    PurchIdMap.insert('70002154','05-11-2008');
+        #    PurchIdMap.insert('70002155','05-11-2008');
+        #    PurchIdMap.insert('70002156','05-11-2008');
+        #    PurchIdMap.insert('70002157','05-11-2008');
+        #    PurchIdMap.insert('70002158','05-11-2008');
+        #    PurchIdMap.insert('70002159','05-11-2008');
+        #    PurchIdMap.insert('70002160','05-11-2008');
+        #    PurchIdMap.insert('70002161','05-11-2008');
+        #    PurchIdMap.insert('70002162','05-11-2008');
+        #    PurchIdMap.insert('70002163','05-11-2008');
+        #    PurchIdMap.insert('70002164','05-11-2008');
+        #    PurchIdMap.insert('70002167','05-11-2008');
+        #    PurchIdMap.insert('70002197','09-11-2008');
+        #    PurchIdMap.insert('70002198','09-11-2008');
+        #    PurchIdMap.insert('70002199','09-11-2008');
+        #    PurchIdMap.insert('70002200','09-11-2008');
+        #    PurchIdMap.insert('70002201','09-11-2008');
+        #    PurchIdMap.insert('70002202','09-11-2008');
+        #    PurchIdMap.insert('70002203','09-11-2008');
+        #    PurchIdMap.insert('70002204','09-11-2008');
+        #    PurchIdMap.insert('70002205','09-11-2008');
+        #    PurchIdMap.insert('70002206','09-11-2008');
+        #    PurchIdMap.insert('70002207','09-11-2008');
+        #    PurchIdMap.insert('70002208','09-11-2008');
+        #    PurchIdMap.insert('70002248','09-11-2008');
+        #    PurchIdMap.insert('70002249','09-11-2008');
+        #    PurchIdMap.insert('70002250','09-11-2008');
+        #    PurchIdMap.insert('70002251','09-11-2008');
+        #    PurchIdMap.insert('70002252','09-11-2008');
+        #    PurchIdMap.insert('70002253','09-11-2008');
+        #    PurchIdMap.insert('70002254','09-11-2008');
+        #    PurchIdMap.insert('70002255','09-11-2008');
+        #    PurchIdMap.insert('70002256','09-11-2008');
+        #    PurchIdMap.insert('70002284','09-11-2008');
+        #    PurchIdMap.insert('70002285','09-11-2008');
+        #    PurchIdMap.insert('70002286','09-11-2008');
+        #    PurchIdMap.insert('70002287','09-11-2008');
+        #    PurchIdMap.insert('70002295','09-11-2008');
+        #    PurchIdMap.insert('70002296','09-11-2008');
+        #    PurchIdMap.insert('70002297','09-11-2008');
+        #    PurchIdMap.insert('70002298','09-11-2008');
+        #    PurchIdMap.insert('70002299','09-11-2008');
+        #    Return PurchIdMap;
+        #}
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: PRN
+
+; Microsoft Dynamics Project : DC_SGIntegration_200812 unloaded
+; --------------------------------------------------------------------------------
+  PROJECTVERSION 2
+  
+  PROJECT #DC_SGIntegration_200812
+   SHARED
+  PROPERTIES
+    Name                #DC_SGIntegration_200812
+  ENDPROPERTIES
+  
+    BEGINNODE
+      FILETYPE 0
+      UTILTYPE 45
+      UTILOBJECTID 40213
+      NODETYPE 329
+      NAME #DC_PurchConsolidateBatch
+    ENDNODE
+    BEGINNODE
+      FILETYPE 0
+      UTILTYPE 45
+      UTILOBJECTID 40220
+      NODETYPE 329
+      NAME #DC_IntegrationSG
+    ENDNODE
+  ENDPROJECT
+  
+
+***Element: END

@@ -1,0 +1,14 @@
+7.0
+12
+1       SQLCHAR       0       10      ""                        1     ZIPCODE
+2       SQLCHAR       0       30      ""                        2     CITY
+3       SQLCHAR       0       30      ""                        3     STREETNAME
+4       SQLINT        0       4       ""                        4     FROMNUM
+5       SQLINT        0       4       ""                        5     TONUM
+6       SQLINT        0       4       ""                        6     EVENODD
+7       SQLCHAR       0       10      ""                        7     COUNTY
+8       SQLCHAR       0       10      ""                        8     COUNTRY
+9       SQLCHAR       0       10      ""                        9     STATE
+10      SQLCHAR       0       30      ""                        10    CITYALIAS
+11      SQLCHAR       0       3       ""                        11    DATAAREAID
+12      SQLINT        0       4       ""                        12    RECID

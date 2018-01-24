@@ -1,0 +1,7 @@
+
+select count(*) from dbo.TR_REPORTTIME
+	where  STARTDATE < CONVERT(DATETIME,'12/01/2006',101)
+
+update dbo.TR_REPORTTIME
+	set TR_REPORTTIME.remark = ''
+	where  TR_REPORTTIME.STARTDATE < CONVERT(DATETIME,'12/01/2006',101);

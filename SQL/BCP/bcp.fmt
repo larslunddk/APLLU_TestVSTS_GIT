@@ -1,0 +1,17 @@
+9.0
+15
+1       SQLCHAR       2       10      ""   1     ACCOUNTNUM                               SQL_Latin1_General_CP1_CI_AS
+2       SQLCHAR       2       30      ""   2     CustName                                 SQL_Latin1_General_CP1_CI_AS
+3       SQLCHAR       2       10      ""   3     CUSTGROUP                                SQL_Latin1_General_CP1_CI_AS
+4       SQLCHAR       2       10      ""   4     Dept                                     SQL_Latin1_General_CP1_CI_AS
+5       SQLCHAR       2       10      ""   5     DIMENSION2_                              SQL_Latin1_General_CP1_CI_AS
+6       SQLCHAR       2       10      ""   6     DIMENSION3_                              SQL_Latin1_General_CP1_CI_AS
+7       SQLCHAR       2       20      ""   7     INVOICEID                                SQL_Latin1_General_CP1_CI_AS
+8       SQLCHAR       2       10      ""   8     SALESADMINISTRATOR                       SQL_Latin1_General_CP1_CI_AS
+9       SQLCHAR       2       10      ""   9     INVCOUNTRY                               SQL_Latin1_General_CP1_CI_AS
+10      SQLCHAR       2       10      ""   10    DLVCOUNTRY                               SQL_Latin1_General_CP1_CI_AS
+11      SQLNUMERIC    1       19      ""   11    CustAmount                               ""
+12      SQLCHAR       2       1000    ""   12    ItemName                                 SQL_Latin1_General_CP1_CI_AS
+13      SQLNUMERIC    1       19      ""   13    Qty                                      ""
+14      SQLNUMERIC    1       19      ""   14    Lineamount                               ""
+15      SQLINT        1       4       ""   15    Count                                    ""

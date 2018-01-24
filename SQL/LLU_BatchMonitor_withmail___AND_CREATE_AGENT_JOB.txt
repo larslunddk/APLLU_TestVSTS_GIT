@@ -1,0 +1,181 @@
+USE [msdb]
+GO
+
+/****** Object:  Job [Dynamics AX Batch History Mail Status]    Script Date: 18-05-2017 14:25:22 ******/
+BEGIN TRANSACTION
+DECLARE @ReturnCode INT
+SELECT @ReturnCode = 0
+/****** Object:  JobCategory [[Uncategorized (Local)]]    Script Date: 18-05-2017 14:25:22 ******/
+IF NOT EXISTS (SELECT name FROM msdb.dbo.syscategories WHERE name=N'[Uncategorized (Local)]' AND category_class=1)
+BEGIN
+EXEC @ReturnCode = msdb.dbo.sp_add_category @class=N'JOB', @type=N'LOCAL', @name=N'[Uncategorized (Local)]'
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+
+END
+
+DECLARE @jobId BINARY(16)
+EXEC @ReturnCode =  msdb.dbo.sp_add_job @job_name=N'Dynamics AX Batch History Mail Status', 
+		@enabled=1, 
+		@notify_level_eventlog=0, 
+		@notify_level_email=0, 
+		@notify_level_netsend=0, 
+		@notify_level_page=0, 
+		@delete_level=0, 
+		@description=N'Sending mail with Dynamics AX Batch Job history', 
+		@category_name=N'[Uncategorized (Local)]', 
+		@owner_login_name=N'ZEBRA\NG.Sqladmin', @job_id = @jobId OUTPUT
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+/****** Object:  Step [Send Dynamics Batch Job History]    Script Date: 18-05-2017 14:25:22 ******/
+EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Send Dynamics Batch Job History', 
+		@step_id=1, 
+		@cmdexec_success_code=0, 
+		@on_success_action=1, 
+		@on_success_step_id=0, 
+		@on_fail_action=2, 
+		@on_fail_step_id=0, 
+		@retry_attempts=0, 
+		@retry_interval=0, 
+		@os_run_priority=0, @subsystem=N'TSQL', 
+		@command=N'USE [AX2012_PROD]
+GO
+
+
+Declare @BatchJobList table
+(STARTDATETIME DATETIME, BATCHCAPTION VARCHAR(100), StartDelay INT, Execdelay INT, WarnStartThreshold INT,	WarnExecThreshold INT, ErrStartThreshold INT, ErrExecThreshold INT, INFO VARCHAR(30))
+
+Declare @BatchJobListTemp table
+(STARTDATETIME DATETIME, BATCHCAPTION VARCHAR(100), StartDelay INT, Execdelay INT, WarnStartThreshold INT,	WarnExecThreshold INT, ErrStartThreshold INT, ErrExecThreshold INT, INFO VARCHAR(30), ID INT )
+
+
+Declare @MailDate VARCHAR(50)
+DECLARE @MailRecipients VARCHAR(200)
+DECLARE @MailSubject VARCHAR(100)
+/* DECLARE @MailBody VARCHAR(4000) */
+DECLARE @ID INT
+DECLARE @MAX INT
+DECLARE @STARTDATETIME VARCHAR(120)
+DECLARE @BATCHCAPTION VARCHAR(100)
+DECLARE @StartDelay VARCHAR(5)
+DECLARE @Execdelay VARCHAR(5)
+DECLARE @WarnStartThreshold VARCHAR(5)
+DECLARE	@WarnExecThreshold VARCHAR(5)
+DECLARE @ErrStartThreshold VARCHAR(5)
+DECLARE @ErrExecThreshold VARCHAR(5)
+DECLARE @INFO VARCHAR(30)
+Declare @OutPutHTML NVARCHAR(MAX) 
+
+
+/* Mail Recipients Address */
+SET @MailRecipients = ''llu@alfapeople.com''
+
+
+
+INSERT @BatchJobList
+select top 100  
+       --BATCHJOBHISTORY.ORIGSTARTDATETIME, 
+       BATCHJOBHISTORY.STARTDATETIME, 
+       BATCHJOBHISTORY.CAPTION,
+       datediff(SECOND, BATCHJOBHISTORY.ORIGSTARTDATETIME,BATCHJOBHISTORY.STARTDATETIME)/60 [StartDelay (min)],
+       datediff(SECOND, BATCHJOBHISTORY.STARTDATETIME, BATCHJOBHISTORY.ENDDATETIME)/60 [Exec delay (min)],
+       EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING [Warn Start Threshold],
+       EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING [Warn Exec Threshold],
+       EGBCBATCHJOB.STARTTIMETHRESHOLDERROR [Err Start Threshold],
+       EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR [Err Exec Threshold],
+       case when (datediff(SECOND, BATCHJOBHISTORY.ORIGSTARTDATETIME,BATCHJOBHISTORY.STARTDATETIME)/60>EGBCBATCHJOB.STARTTIMETHRESHOLDERROR) THEN ''ERROR STARTTIME'' 
+       else case when (datediff(SECOND, BATCHJOBHISTORY.STARTDATETIME,BATCHJOBHISTORY.ENDDATETIME)/60>EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR) THEN ''ERROR EXECTTIME''
+       else case when (datediff(SECOND, BATCHJOBHISTORY.ORIGSTARTDATETIME,BATCHJOBHISTORY.STARTDATETIME)/60>EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING) THEN ''WARN STARTTIME'' 
+       else case when (datediff(SECOND, BATCHJOBHISTORY.STARTDATETIME,BATCHJOBHISTORY.ENDDATETIME)/60>EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING) THEN ''WARN EXECTTIME''
+       else ''n/a''
+       END END END END [INFO]
+from BATCHJOBHISTORY
+join BATCHJOB 
+on BATCHJOB.RECID = BATCHJOBHISTORY.BATCHJOBID
+join EGBCBATCHJOB
+on EGBCBATCHJOB.BATCHJOB = BATCHJOB.RECID
+where BATCHJOBHISTORY.status<>0
+and BATCHJOBHISTORY.ORIGSTARTDATETIME>=dateadd(day,-1,getdate())
+and BATCHJOBHISTORY.ORIGSTARTDATETIME<=getdate()
+and EGBCBATCHJOB.STARTTIMETHRESHOLDERROR<>0
+and EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR<>0
+and (datediff(SECOND, BATCHJOBHISTORY.ORIGSTARTDATETIME,BATCHJOBHISTORY.STARTDATETIME)/60>EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING
+       OR datediff(SECOND, BATCHJOBHISTORY.STARTDATETIME, BATCHJOBHISTORY.ENDDATETIME)/60>EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING)
+order by STARTDATETIME
+
+
+/* Date and Time */
+Select @MailDate = convert(varchar, getdate(), 120)
+
+/* Mail Subject */
+Select @MailSubject=''Dynanmics AX Batch Job Status - Server: ''+@@SERVERNAME +'' Date: '' +@MailDate
+
+INSERT @BatchJobListTemp
+SELECT STARTDATETIME, BATCHCAPTION, StartDelay, Execdelay, WarnStartThreshold, WarnExecThreshold, ErrStartThreshold, ErrExecThreshold, INFO, ROW_NUMBER() OVER(ORDER BY  COUNT(*) DESC) AS  ID
+FROM @BatchJobList
+GROUP BY STARTDATETIME, BATCHCAPTION, StartDelay, Execdelay, WarnStartThreshold, WarnExecThreshold, ErrStartThreshold, ErrExecThreshold, INFO
+ORDER BY  COUNT(*) DESC
+
+SET @OutPutHTML = ''<body><table><tr><table border="1"><td>STARTDATETIME</td><td>CAPTION</td><td>StartDelay (min)</td><td>Exec delay (min)</td><td>Warn Start Threshold</td><td>Warn Exec Threshold</td><td>Err Start Threshold</td><td>Err Exec Threshold</td><td>INFO</td></tr>''
+
+SELECT @MAX = MAX(ID) FROM @BatchJobListTemp
+
+
+SET @ID=1
+WHILE @ID <= @MAX
+ BEGIN
+
+	SELECT @STARTDATETIME = convert(varchar,STARTDATETIME,120) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @BATCHCAPTION = BATCHCAPTION FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @StartDelay = convert(varchar,StartDelay,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @Execdelay = convert(varchar,Execdelay,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @WarnStartThreshold = convert(varchar,WarnStartThreshold,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @WarnExecThreshold = convert(varchar,WarnExecThreshold,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @ErrStartThreshold = convert(varchar,ErrStartThreshold,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @ErrExecThreshold = convert(varchar,ErrExecThreshold,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @INFO = INFO FROM @BatchJobListTemp WHERE @ID = ID
+ 
+	SET @OutPutHTML = @OutPutHTML + ''<tr><td>''+@STARTDATETIME+''<td>''+@BATCHCAPTION+''</td><td>''+@StartDelay+''</td><td>''+@Execdelay+''</td><td>''+@WarnStartThreshold+''</td><td>''+@WarnExecThreshold+''</td><td>''+@ErrStartThreshold+''</td><td>''+@ErrExecThreshold+''</td><td>''+@INFO+''</td></tr>''
+
+	SET	@ID = @ID + 1
+ END
+
+SET @OutPutHTML = @OutPutHTML + ''</table></body>''
+
+
+
+
+
+EXEC msdb..sp_send_dbmail @recipients = @MailRecipients,
+@subject = @MailSubject,
+@body = @OutPutHTML,  
+@body_format = ''HTML'' ; 
+', 
+		@database_name=N'AX2012_PROD', 
+		@flags=0
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+EXEC @ReturnCode = msdb.dbo.sp_update_job @job_id = @jobId, @start_step_id = 1
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+EXEC @ReturnCode = msdb.dbo.sp_add_jobschedule @job_id=@jobId, @name=N'Send Dynamics Batch Job History Schedule', 
+		@enabled=1, 
+		@freq_type=4, 
+		@freq_interval=1, 
+		@freq_subday_type=1, 
+		@freq_subday_interval=0, 
+		@freq_relative_interval=0, 
+		@freq_recurrence_factor=0, 
+		@active_start_date=20170517, 
+		@active_end_date=99991231, 
+		@active_start_time=60000, 
+		@active_end_time=235959, 
+		@schedule_uid=N'd047ba69-2976-480f-a756-d5d8e68ae2fa'
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+EXEC @ReturnCode = msdb.dbo.sp_add_jobserver @job_id = @jobId, @server_name = N'(local)'
+IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+COMMIT TRANSACTION
+GOTO EndSave
+QuitWithRollback:
+    IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION
+EndSave:
+
+GO
+
+

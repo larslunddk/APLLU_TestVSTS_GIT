@@ -1,0 +1,332 @@
+Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: CLS
+
+; Microsoft Business Solutions-Axapta Class: LLU_Convert_TableDefToOracleConv unloaded at Friday 01-12-2006
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #LLU_Convert_TableDefToOracleConv
+    PROPERTIES
+      Name                #LLU_Convert_TableDefToOracleConv
+      Extends             #
+      RunOn               #Called from
+    ENDPROPERTIES
+    
+    METHODS
+      Version: 3
+      SOURCE #classDeclaration
+        #class LLU_Convert_TableDefToOracleConv
+        #{
+        #    Filename            ImpfileName;
+        #    Filename            ExpfileName;
+        #    FilePath            FilePath;
+        #
+        #}
+      ENDSOURCE
+      SOURCE #ConvFile
+        #void ConvFile(filename filename)
+        #{
+        #    AsciiIO             AIo;
+        #    AsciiIO             AIo_Out;
+        #    Counter             recCounter;
+        #    container           buffer;
+        #    container           Outbuffer;
+        #
+        #    str                 BufField;
+        #    int                 BufPos;
+        #    str                 Dummy1, Dummy2;
+        #    List                RecList = new List(Types::String);
+        #    ListIterator        IRecList;
+        #    Boolean             Start;
+        #    Str                 _TableName;
+        #    Boolean             First;
+        #    ;
+        #    Impfilename = filename;
+        #    [Dummy1,Expfilename,Dummy2] = FileNameSplit(filename);
+        #    ExpFilename = Dummy1+ExpFilename+'_out'+Dummy2;
+        #
+        #    startLengthyOperation();
+        #    setprefix("Exporting");
+        #    info("Writing"+" "+Expfilename);
+        #
+        #/*    box::info('ImpFilename.: '+Impfilename+'\n'+
+        #              'OutFilename.: '+ExpFilename);
+        #*/
+        #    AIo      = new AsciiIO(ImpFilename, 'r');
+        #    AIo_Out  = new AsciiIO(ExpFilename, 'W');
+        #    AIo.inRecordDelimiter("\r\n");
+        #    AIo.inFieldDelimiter("SletIngenDelimiter");
+        #    AIo_Out.OutRecordDelimiter("\r\n");
+        #    AIo_Out.OutFieldDelimiter("SletIngenDelimiter");
+        #
+        #    Buffer = AIo.read();
+        #    while (Buffer)
+        #    {
+        #        BufField = conpeek(Buffer,1);
+        #            if (SubStr(BufField,1,StrLen('INSERT INTO')) == 'INSERT INTO')
+        #            {
+        #                _TableName = Substr(BufField,StrScan(BufField,'.',StrLen(BufField),-999),999);
+        #                _TableName = StrReplace(_TableName,'[','');
+        #                _TableName = StrReplace(_TableName,']','');
+        #                _TableName = StrReplace(_TableName,'.','');
+        #                info(StrFmt('Tablename = %1',_TableName));
+        #            }
+        #
+        #        if (StrScan(BufField,'<',1,1000))
+        #            Start = True;
+        #        if (Start)
+        #        {
+        #            BufField = StrLRTrim(BufField);
+        #            BufField = StrReplace(BufField,'<','');
+        #            BufField = StrReplace(BufField,'>','');
+        #            if (SubStr(BufField,1,1) == '(')
+        #                BufField = SubStr(BufField,2,999);
+        #            if (SubStr(BufField,StrLen(BufField),1) == ')')
+        #                BufField = SubStr(BufField,1,StrLen(BufField)-1);
+        #            if (SubStr(BufField,1,1) == ',')
+        #                BufField = SubStr(BufField,2,999);
+        #            if (SubStr(BufField,StrLen(BufField),1) == ',')
+        #                BufField = SubStr(BufField,1,StrLen(BufField)-1);
+        #
+        #            BufField = StrReplace(BufField,'[','');
+        #            BufField = StrReplace(BufField,']','');
+        #                RecList.addEnd(BufField);
+        #                recCounter++;
+        #        }
+        #        Buffer = AIo.read();
+        #    }
+        #
+        #    this.Writefile(AIo_Out,'use AXKNITEST');
+        #    this.Writefile(AIo_Out,'DROP VIEW Tmp_View'+_Tablename);
+        #    this.Writefile(AIo_Out,'DROP VIEW Tmp_View'+_Tablename+'_ORA');
+        #    this.Writefile(AIo_Out,'drop table dbo.TMP_'+_Tablename);
+        #    this.Writefile(AIo_Out,'GO');
+        #    this.Writefile(AIo_Out,'select * into AXKNITEST.dbo.TMP_'+_Tablename);
+        #    this.Writefile(AIo_Out,'FROM OPENQUERY(S2AX40TEST, \'SELECT ');
+        #    First = False;
+        #    IRecList = new ListIterator(RecList);
+        #    while (IReclist.more())
+        #    {
+        #        BufField = IRecList.value();
+        #        if (StrScan(BufField,'numeric',1,999) || StrScan(BufField,'int',1,999))
+        #            BufField = ' ,TO_CHAR('+this.Fldname(BufField)+')';
+        #        else
+        #            BufField = ' ,'+this.Fldname(BufField);
+        #        if (!First)
+        #            BufField = ' '+SubStr(BufField,3,999);
+        #        First = True;
+        #        this.Writefile( AIo_Out,BufField);
+        #        IRecList.next();
+        #    }
+        #    this.Writefile(AIo_Out,' FROM dbo.'+_Tablename+' WHERE SUBSTR(NLS_LOWER(DATAAREAID),1,7) = \'\'kni\'\'\')');
+        #    this.Writefile(AIo_Out,' ');
+        #    this.Writefile(AIo_Out,'GO');
+        #    this.Writefile(AIo_Out,'CREATE VIEW TMP_View'+_Tablename+' AS');
+        #    this.Writefile(AIo_Out,' select ');
+        #    First = False;
+        #    IRecList = new ListIterator(RecList);
+        #    while (IReclist.more())
+        #    {
+        #        BufField = IRecList.value();
+        #        BufField = ' ,'+this.Fldname(BufField);
+        #        if (!First)
+        #            BufField = ' '+SubStr(BufField,3,999);
+        #        First = True;
+        #        this.Writefile( AIo_Out,BufField);
+        #        IRecList.next();
+        #    }
+        #    this.Writefile(AIo_Out,' from dbo.'+_Tablename);
+        #    this.Writefile(AIo_Out,'GO');
+        #    this.Writefile(AIo_Out,' ');
+        #    this.Writefile(AIo_Out,'CREATE VIEW TMP_View'+_Tablename+'ORA AS');
+        #    this.Writefile(AIo_Out,'select');
+        #    First = False;
+        #    IRecList = new ListIterator(RecList);
+        #    while (IReclist.more())
+        #    {
+        #        BufField = IRecList.value();
+        #        if (StrScan(BufField,'numeric',1,999))
+        #            BufField = ' ,CAST('+this.Fldname(BufField)+' as real) AS '+this.Fldname(BufField);
+        #        else
+        #        if (StrScan(BufField,'int',1,999))
+        #        {
+        #            if (StrScan(BufField,'bigint',1,999))
+        #                BufField = ' ,CAST('+this.Fldname(BufField)+' as bigint) AS '+this.Fldname(BufField);
+        #            else
+        #                BufField = ' ,CAST('+this.Fldname(BufField)+' as int) AS '+this.Fldname(BufField);
+        #        }
+        #        else
+        #            BufField = ' ,'+this.Fldname(BufField);
+        #
+        #        if (!First)
+        #            BufField = ' '+SubStr(BufField,3,999);
+        #        First = True;
+        #        this.Writefile( AIo_Out,BufField);
+        #        IRecList.next();
+        #    }
+        #    this.Writefile(AIo_Out,'from dbo.TMP_'+_Tablename);
+        #    this.Writefile(AIo_Out,'GO');
+        #    this.Writefile(AIo_Out,'delete from TMP_View'+_Tablename+' where dataareaid = \'KNI\'');
+        #    this.Writefile(AIo_Out,'insert into TMP_View'+_Tablename+' select * from TMP_View'+_Tablename+'ORA');
+        #
+        #    info(StrFmt("%1 Records read to file", recCounter));
+        #    endLengthyOperation();
+        #
+        #
+        #
+        #}
+      ENDSOURCE
+      SOURCE #Fldname
+        #str Fldname(str St)
+        #{
+        #    ;
+        #    Return SubStr(St,1,StrScan(St,',',1,9999)-1);
+        #}
+      ENDSOURCE
+      SOURCE #method1
+        #void method1()
+        #{
+        #/*
+        #use AXKNITEST
+        #DROP VIEW Tmp_ViewLedgBalTrans
+        #DROP VIEW Tmp_ViewLedgBalTransORA
+        #drop table dbo.TMP_LedgerBalTrans
+        #GO
+        #select * into AXKNITEST.dbo.TMP_LedgerBalTrans
+        #FROM OPENQUERY(S2AX40TEST, 'SELECT ACCOUNTNUM
+        #        ,TRANSDATE
+        #        ,TO_CHAR(DEBITMST) AS DEBITMST
+        #        ,TO_CHAR(CREDITMST) AS CREDITMST
+        #        ,TO_CHAR(DEBITOPRMST) AS DEBITOPRMST
+        #        ,TO_CHAR(CREDITOPRMST) AS CREDITOPRMST
+        #        ,TO_CHAR(DEBITTAXMST) AS DEBITTAXMST
+        #        ,TO_CHAR(CREDITTAXMST) AS CREDITTAXMST
+        #        ,TO_CHAR(PERIODCODE) AS PERIODCODE
+        #        ,TO_CHAR(DEBITMSTSECOND) AS DEBITMSTSECOND
+        #        ,TO_CHAR(CREDITMSTSECOND) AS CREDITMSTSECOND
+        #        ,TO_CHAR(DEBITOPRMSTSECOND) AS DEBITOPRMSTSECOND
+        #        ,TO_CHAR(CREDITOPRMSTSECOND) AS CREDITOPRMSTSECOND
+        #        ,TO_CHAR(DEBITTAXMSTSECOND) AS DEBITTAXMSTSECOND
+        #        ,TO_CHAR(CREDITTAXMSTSECOND) AS CREDITTAXMSTSECOND
+        #        ,TO_CHAR(QTY) AS QTY
+        #        ,TO_CHAR(SYSTEMGENERATEDULTIMO ) AS SYSTEMGENERATEDULTIMO
+        #        ,TO_CHAR(LEDGERBALANCESVARIANT) AS LEDGERBALANCESVARIANT
+        #        ,DATAAREAID
+        #        ,TO_CHAR(RECID) AS RECID
+        # FROM dbo.LEDGERBALANCESTRANS WHERE SUBSTR(NLS_LOWER(DATAAREAID),1,7) = ''kni''')
+        #
+        #
+        #CREATE VIEW TMP_ViewLedgerBalTrans AS
+        #    select ACCOUNTNUM
+        #        ,TRANSDATE
+        #        ,DEBITMST
+        #        ,CREDITMST
+        #        ,DEBITOPRMST
+        #        ,CREDITOPRMST
+        #        ,DEBITTAXMST
+        #        ,CREDITTAXMST
+        #        ,PERIODCODE
+        #        ,DEBITMSTSECOND
+        #        ,CREDITMSTSECOND
+        #        ,DEBITOPRMSTSECOND
+        #        ,CREDITOPRMSTSECOND
+        #        ,DEBITTAXMSTSECOND
+        #        ,CREDITTAXMSTSECOND
+        #        ,QTY
+        #        ,SYSTEMGENERATEDULTIMO
+        #        ,LEDGERBALANCESVARIANT
+        #        ,DATAAREAID
+        #        ,RECID from dbo.ledgerbalancestrans
+        #GO
+        #CREATE VIEW TMP_ViewLedgerBalTransORA AS
+        #    select
+        #        ACCOUNTNUM
+        #        ,TRANSDATE
+        #        ,CAST(DEBITMST as real) AS DEBITMST
+        #        ,CAST(CREDITMST as real) AS CREDITMST
+        #        ,CAST(DEBITOPRMST as real) AS DEBITOPRMST
+        #        ,CAST(CREDITOPRMST as real) AS CREDITOPRMST
+        #        ,CAST(DEBITTAXMST as real) AS DEBITTAXMST
+        #        ,CAST(CREDITTAXMST as real) AS CREDITTAXMST
+        #        ,CAST(PERIODCODE as int) AS PERIODCODE
+        #        ,CAST(DEBITMSTSECOND as real) AS DEBITMSTSECOND
+        #        ,CAST(CREDITMSTSECOND as real) AS CREDITMSTSECOND
+        #        ,CAST(DEBITOPRMSTSECOND as real) AS DEBITOPRMSTSECOND
+        #        ,CAST(CREDITOPRMSTSECOND as real) AS CREDITOPRMSTSECOND
+        #        ,CAST(DEBITTAXMSTSECOND as real) AS DEBITTAXMSTSECOND
+        #        ,CAST(CREDITTAXMSTSECOND as real) AS CREDITTAXMSTSECOND
+        #        ,CAST(QTY as real) AS QTY
+        #        ,CAST(SYSTEMGENERATEDULTIMO  as int) AS SYSTEMGENERATEDULTIMO
+        #        ,CAST(LEDGERBALANCESVARIANT as int) AS LEDGERBALANCESVARIANT
+        #        ,DATAAREAID
+        #        ,CAST(RECID as int) AS RECID from dbo.TMP_LedgerBalTrans
+        #
+        #GO
+        #delete from TMP_ViewLedgerBalTrans where dataareaid = 'KNI'
+        #insert into TMP_ViewLedgerBalTrans select * from TMP_ViewLedgerBalTransORA
+        #--select top 10 CREATEDBY from Tmp_ViewLedgerTransORA
+        #*/
+        #}
+      ENDSOURCE
+      SOURCE #run
+        #void run()
+        #{
+        #    ;
+        #    this.ConvFile('c:\\#Util\\SQL\\MakeOracleTransfer\\LedgerJournalTrans.sql');
+        #    this.ConvFile('c:\\#Util\\SQL\\MakeOracleTransfer\\LedgerJournalTable.sql');
+        #}
+      ENDSOURCE
+      SOURCE #SetFirstLastName
+        #Container SetFirstLastName(container InBuffer)
+        #{
+        #    str 200     _FullName;
+        #    str 50      _LastName, _Init;
+        #    int         _Pos;
+        #    Container OutBuffer;
+        #    ;
+        #    _FullName   = Conpeek(InBuffer,1);
+        #
+        #    //Isolate
+        #    _Pos        = StrScan(_FullName,' ', StrLen(_FullName), -999);
+        #    _Init       = SubStr(_FullName, _Pos+1, 999);
+        #    _FullName   = SubStr(_FullName, 1, _Pos-1);
+        #    _Init       = StrRem(_Init, '(');
+        #    _Init       = StrRem(_Init, ')');
+        #    _Init       = StrRem(_Init, ' ');
+        #
+        #    _Pos        = StrScan(_FullName,' ', StrLen(_FullName), -999);
+        #    _LastName   = SubStr(_FullName, _Pos+1, 999);
+        #    _FullName   = SubStr(_FullName, 1, _Pos-1);
+        #
+        #     OutBuffer  = InBuffer;
+        #     Outbuffer  += _Init;
+        #     OutBuffer  += _FullName;
+        #     OutBuffer  += _LastName;
+        #//     ConIns(Outbuffer, 5, _Init);
+        #//     ConIns(Outbuffer, 6, _FullName);
+        #//     ConIns(Outbuffer, 7, _LastName);
+        #     Return Outbuffer;
+        #}
+      ENDSOURCE
+      SOURCE #Writefile
+        #void Writefile(AsciiIO AIo_Out,Str Txt)
+        #{
+        #    ;
+        #    AIo_Out.write([Txt]);
+        #
+        #}
+      ENDSOURCE
+      SOURCE #Main
+        #static void Main(args args)
+        #{
+        #    LLU_Convert_TableDefToOracleConv LLU_Convert_TableDefToOracleConv = new LLU_Convert_TableDefToOracleConv();
+        #    ;
+        #    LLU_Convert_TableDefToOracleConv.run();
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: END

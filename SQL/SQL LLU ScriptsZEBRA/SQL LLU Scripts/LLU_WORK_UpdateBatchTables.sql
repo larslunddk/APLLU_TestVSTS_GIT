@@ -1,0 +1,13 @@
+insert into BATCHJOBHISTORY select * from [Temp_LarsLund2]..BATCHJOBHISTORY b 
+								where not exists (select 1 from BATCHJOBHISTORY b2 where b2.recid = b.RECID)
+
+insert into BATCHHISTORY select * from [Temp_LarsLund2]..BATCHHISTORY b where b.STARTDATETIME < '2017-08-17 20:51:11.000' and b.STARTDATETIME>'1900-01-01 00:00:00.000'
+insert into BATCHCONSTRAINTSHISTORY select * from [Temp_LarsLund2]..BATCHCONSTRAINTSHISTORY b where
+	exists (select 1 from BATCHHISTORY where BATCHHISTORY.RECID = b.BATCHID and BATCHHISTORY.STARTDATETIME < '2017-08-17 20:51:11.000' and BATCHHISTORY.STARTDATETIME>'1900-01-01 00:00:00.000')
+
+--select min(STARTDATETIME) from BATCHHISTORY b where b.STARTDATETIME>'1900-01-01 00:00:00.000'
+--insert into BATCHJOBHISTORY select * from [Temp_LarsLund2]..BATCHJOBHISTORY b where b.STARTDATETIME < '2017-04-18 00:00:03.000' and b.STARTDATETIME>'1900-01-01 00:00:00.000'
+select count(*) from BATCHJOBHISTORY
+select count(*) from BATCHHISTORY
+select count(*) From BATCHCONSTRAINTSHISTORY
+

@@ -1,0 +1,77 @@
+@EET7 Label file(s) created on 29/6/2005
+By user Admin
+@EET8 
+@EET9 
+@EET10 
+@EET11 
+@EET12 
+@EET13 
+@EET14 
+@EET15 
+@EET16 
+@EET17 
+@EET18 
+@EET19 
+@EET20 
+@EET21 
+@EET22 dftgd
+@EET23 Clear List/Tra
+@EET24 Apply Selected Trace
+@EET25 Trace All/Clear List
+@EET26 Select the table(s) to include in SQL Tracing
+@EET27 Save selection to template
+@EET28 Do you want to remove tracing from the current tables being traced prior to inserting the template information?
+@EET29 Do you want to apply the changes made to this user?
+@EET30 Are you sure you want to delete this trace template?
+@EET31 Import templates
+@EET32 Export template
+@EET33 Must choose a template name
+@EET34 Error opening template export file
+@EET35 SQL Operation Counter
+@EET36 Collect Stats for Trace Selected Tables
+@EET37 Collect stats for all tables
+@EET38 Stop collecting
+@EET39 Refresh the displayed stats
+@EET40 Do you want to clear the current statistics before starting?
+@EET41 Collect SQL Stats
+@EET42 Blocking Tracker Setup
+@EET43 Stop Blocking Tracking
+@EET44 Start BlockingTracking
+@EET45 Minimum Time for Blocker
+@EET46 Search Frequency in seconds
+@EET47 Timestamp
+@EET48 Search Freq. (secs)
+@EET49 Min. Time for Blocks
+@EET50 Host Name
+@EET51 Resource
+@EET52 Last SQL Batch
+@EET53 TranID
+@EET54 Last Command
+@EET55 Max Time Blocked
+@EET56 Number of Searches Done
+@EET57 Last Search Performed
+@EET58 Blocking Tracking
+@EET59 Clear Blocking Info
+@EET60 Clear blocking history
+@EET61 select 0 to clear all blocking history
+@EET62 Must provide a positive number
+@EET63 Call Stack information will only appear for tables that are being traced using the SQL Trace feature.
+@EET64 SQL Server Agent is not started - please Start it and begin the tracking again
+@EET65 Please delete the blank row before continuing
+@EET66 Top of Call Stack
+@EET67 Method Called
+@EET68 Transaction View
+@EET69 Related Table Activity
+@EET70 Activity Between
+@EET71 Activity Between:   Start Date
+@EET72 All Users - DB Setttings
+@EET73 This will replace the SQL Trace flag, Query Threshold and Trace to Database Flags to all users. Do you want to continue?
+@EET74 Apply Trace to All Users
+@EET75 This will roll the selected tables to all users. Are you sure you want to continue?
+@EET76 This will clear the selected tables from all users. Are you sure you want to continue?
+@EET77 Do you want to remove any existing tracing from the current tables being traced prior to applying the specific tables shown in this window?
+@EET78 In order to see these changes take effect, users will need to log out and log back in again.
+@EET79 Blocking Activity Report
+@EET80 Edit Script Source
+@EET81 Edit Script Source Code
+@EET82 Blocking Tracking permissions have not been setup on this system. Refer to the Blocking Tracking documentation for information on how to grant the permissions needed to start the tracing.

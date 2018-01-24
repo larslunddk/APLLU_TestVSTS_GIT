@@ -1,0 +1,30 @@
+Changed database context to 'widsql3_cit_udv'.
+                                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------
+Mar 31 2008 10:32AM             Step3 p†begyndt                                                                                    
+Msg 3701, Level 11, State 5, Server WIDEXSQL12, Line 13
+Cannot drop the table 'inventtableshadow', because it does not exist or you do not have permission.
+                                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------
+Mar 31 2008 10:32AM             Temp inventTableShadow dannet - Slut:                                                              
+Msg 3701, Level 11, State 5, Server WIDEXSQL12, Line 22
+Cannot drop the table 'InventTableModuleShadow', because it does not exist or you do not have permission.
+Msg 8152, Level 16, State 14, Server WIDEXSQL12, Line 1
+String or binary data would be truncated.
+The statement has been terminated.
+                                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------
+Mar 31 2008 10:32AM             Temp InventTableModuleShadow dannet - Slut:                                                        
+Msg 3701, Level 11, State 5, Server WIDEXSQL12, Line 6
+Cannot drop the table 'inventitemlocationShadow', because it does not exist or you do not have permission.
+                                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------
+Mar 31 2008 10:32AM             Temp inventitemlocationShadow dannet - Slut:                                                       
+Msg 3701, Level 11, State 5, Server WIDEXSQL12, Line 6
+Cannot drop the table 'UnitConvertShadow', because it does not exist or you do not have permission.
+                                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------
+Mar 31 2008 10:32AM             Temp UnitConvertShadow dannet - Slut:                                                              
+                                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------
+Mar 31 2008 10:32AM             Temp tabeller dannet - Slut:                                                                       

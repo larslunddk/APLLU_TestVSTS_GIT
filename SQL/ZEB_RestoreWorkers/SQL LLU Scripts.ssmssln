@@ -1,0 +1,17 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# SQL Server Management Studio Solution File, Format Version 12.00
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "SQL LLU Scripts", "SQL LLU Scripts\SQL LLU Scripts.ssmssqlproj", "{C1C3E103-C907-4843-A24A-C6DC202D81C4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Default|Default = Default|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C1C3E103-C907-4843-A24A-C6DC202D81C4}.Default|Default.ActiveCfg = Default
+		{8447DA31-CD43-4B7D-BD3A-A5556D430637}.Default|Default.ActiveCfg = Default
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

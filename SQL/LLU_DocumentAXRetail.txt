@@ -1,0 +1,64 @@
+create table #TmpTextDB (ServerName nvarchar(50), DBName nvarchar(50), ParmCaption nvarchar(200), ParmValue nvarchar(200), Line int)
+GO
+/*CREATE PROCEDURE InsertRecCount @TableName nvarchar(200) 
+AS
+BEGIN 
+	declare @SQL nvarchar(1000)
+	select @SQL = 'insert into #Tmp_RecCount values (@@SERVERNAME, '''+@TableName+
+				  ''', (select count(*) from '+
+				  @Tablename+' as recCount))'
+	execute (@SQL)
+END
+GO
+*/
+CREATE PROCEDURE InsertTmpParm (@ParmCaption nvarchar(200), @ParmValue nvarchar(200) )
+AS
+BEGIN 
+	declare @SQL nvarchar(1000)
+	declare @NextLine int = (select top 1 Line from #TmpTextDB order by Line desc)+1
+	insert into #TmpTextDB values (@@SERVERNAME, DB_Name(), @ParmCaption, @ParmValue, @NextLine)
+	--select @SQL = 'insert into #Tmp_RecCount values (@@SERVERNAME, '''+@TableName+
+	--			  ''', (select count(*) from '+
+	--			  @Tablename+' as recCount))'
+	--execute (@SQL)
+END
+GO
+
+
+declare @ParmValue as nvarchar(200)
+
+--CDX message database Parameters
+set @ParmValue = (select top 1 HQMSGDBSERVERNAME from RetailConnParameters)
+exec InsertTmpParm 'Message database/Server name : ', @ParmValue
+set @ParmValue = (select top 1 HQMSGDBINSTANCENAME from RetailConnParameters)
+exec InsertTmpParm 'Message database/Instance name : ', @ParmValue
+set @ParmValue = (select top 1 HQMSGDBNAME from RetailConnParameters)
+exec InsertTmpParm 'Message database/Database name : ', @ParmValue
+set @ParmValue = (select top 1 TRYCOUNT from RetailConnParameters)
+exec InsertTmpParm 'Message database/Try Count : ', @ParmValue
+set @ParmValue = (select top 1 MONITORINGRETENTIONDAYS from RetailConnParameters)
+exec InsertTmpParm 'Message database/MONITORINGRETENTIONDAYS : ', @ParmValue
+
+-- RealTime service
+set @ParmValue = (select top 1 PROFILEID+', '+NAME from RetailTransactionServiceProfile)
+exec InsertTmpParm 'RealTime service/ProfileId,Name : ', @ParmValue
+set @ParmValue = (select top 1 CENTRALTABLESERVER+':'+CENTRALTABLESERVERPORT from RetailTransactionServiceProfile)
+exec InsertTmpParm 'RealTime service/Server:Port : ', @ParmValue
+set @ParmValue = (select top 1 SERVERSERVICENAME from RetailTransactionServiceProfile)
+exec InsertTmpParm 'RealTime service/WebApplication name : ', @ParmValue
+
+set @ParmValue = (select top 1 SERVERCERTIFICATEDNS from RetailTransactionServiceProfile)
+exec InsertTmpParm 'RealTime service/Common name : ', @ParmValue
+set @ParmValue = (select top 1 LANGUAGE from RetailTransactionServiceProfile)
+exec InsertTmpParm 'RealTime service/Language : ', @ParmValue
+set @ParmValue = (select top 1 TSVERSION from RetailTransactionServiceProfile)
+exec InsertTmpParm 'RealTime service/realtime service version : ', @ParmValue
+
+
+
+
+
+
+select * from #TmpTextDB 
+drop table #TmpTextDB 
+drop procedure InsertTmpParm

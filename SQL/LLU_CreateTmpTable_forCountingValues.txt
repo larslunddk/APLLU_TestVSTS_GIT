@@ -1,0 +1,48 @@
+
+create table #Tmp_RecCount (ServerName nvarchar(200),TableName nvarchar(200),Records int)
+--insert into #Tmp_RecCount values ('aaa','bbb',10)
+--insert into #Tmp_RecCount values (@@SERVERNAME, 'ax.RetailButtonGrid', (select count(*) from ax.RetailButtonGrid))
+GO
+CREATE PROCEDURE InsertRecCount @TableName nvarchar(200) 
+AS
+BEGIN 
+	declare @SQL nvarchar(1000)
+	select @SQL = 'insert into #Tmp_RecCount values (@@SERVERNAME, '''+@TableName+
+				  ''', (select count(*) from '+
+				  @Tablename+' as recCount))'
+	execute (@SQL)
+END
+GO
+
+exec InsertRecCount 'ax.RetailButtonGrid'
+exec InsertRecCount 'ax.RetailButtonGridButtons'
+exec InsertRecCount 'ax.RetailDevice'
+exec InsertRecCount 'ax.RetailDrawerPool'
+exec InsertRecCount 'ax.RetailDrawerPoolDevice'
+exec InsertRecCount 'ax.RetailFiscalPrinterConfigTable'
+exec InsertRecCount 'ax.RetailFormLayout'
+exec InsertRecCount 'ax.RetailHardwareProfile'
+exec InsertRecCount 'ax.RetailImages'
+exec InsertRecCount 'ax.RetailKeyboardMappingTable'
+exec InsertRecCount 'ax.RetailKeyboardMappingTrans'
+exec InsertRecCount 'ax.RetailLanguageText'
+exec InsertRecCount 'ax.RetailOperations'
+exec InsertRecCount 'ax.RetailPermissions'
+exec InsertRecCount 'ax.RetailReceiptMasks'
+exec InsertRecCount 'ax.RetailReceiptProfile'
+exec InsertRecCount 'ax.RetailReceiptProfileLine'
+exec InsertRecCount 'ax.RetailTerminalCustomField'
+exec InsertRecCount 'ax.RetailTerminalDevice'
+exec InsertRecCount 'ax.RetailTerminalTable'
+exec InsertRecCount 'ax.RetailTillLayout'
+exec InsertRecCount 'ax.RetailTillLayoutButtonGridZone'
+exec InsertRecCount 'ax.RetailTillLayoutImageZone'
+exec InsertRecCount 'ax.RetailTillLayoutReportZone'
+exec InsertRecCount 'ax.RetailTillLayoutStore'
+exec InsertRecCount 'ax.RetailTillLayoutZone'
+exec InsertRecCount 'ax.RetailTillLayoutZoneReference'
+exec InsertRecCount 'ax.RetailTransactionServiceProfile'
+exec InsertRecCount 'ax.RetailVisualProfile'
+select * from #Tmp_RecCount 
+drop table #Tmp_RecCount 
+drop procedure InsertRecCount

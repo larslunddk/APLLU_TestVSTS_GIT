@@ -1,0 +1,7 @@
+select batchjob.recid, batch.EXECUTEDBY,batch.CREATEDBY, batchjob.CREATEDBY, dbo.enum2str('batchstatus', batchjob.status) as JobStatus,
+batchjob.caption, * from batchjob
+	join batch on
+	batch.BATCHJOBID = batchjob.RECID
+where (batch.CREATEDBY <> batchjob.CREATEDBY
+or	  batch.EXECUTEDBY <> batchjob.CREATEDBY)
+and batchjob.CAPTION <> 'Lasernet tasks'

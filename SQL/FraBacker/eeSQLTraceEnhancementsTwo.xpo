@@ -1,0 +1,270 @@
+Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: CLS
+
+; Microsoft Business Solutions-Axapta Class: Application unloaded at Wednesday 12/21/2005
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #Application
+    PROPERTIES
+      Name                #Application
+      Extends             #xApplication
+      RunOn               #Called from
+    ENDPROPERTIES
+    
+    METHODS
+      Version: 3
+      SOURCE #sysTrace
+        #public void sysTrace(SysTraceType _traceType, container _traceInfo)
+        #{
+        #    int containerLayoutVersion;
+        #    SysTraceTable sysTraceTable;
+        #    container tableList;
+        #    int iFound = 0;
+        #    int iLoop;
+        #
+        #    container traceTableList;
+        #    container traceOperationList;
+        #    eeUserTrace eeUserTrace;
+        #    str sqlStr;
+        #    str sqlType;
+        #    int globProfileWhat;             // 0 = no profiling, 1 = profile all, 2 = profile selected
+        #
+        #    #SysTrace
+        #
+        #
+        #    if ( !SysTrace::sysTraceEnabled() )
+        #        return;
+        #
+        #    if ( _traceType == SysTraceType::CSTrace )
+        #    {
+        #        sysTraceTable.traceType = _traceType;
+        #        sysTraceTable.traceTime = conpeek(_traceInfo,2);
+        #        sysTraceTable.traceContainer = _traceInfo;
+        #        sysTraceTable.insert();
+        #        return;
+        #    }
+        #
+        #    containerLayoutVersion = conPeek(_traceInfo,#SYS_TRACE_SQL_LAYOUT_VERSION);
+        #
+        #    if ( conLen(_traceInfo) < #SYS_TRACE_SQL_LAYOUT_VERSION || containerLayoutVersion > #TRACE_CONTAINER_LAYOUT_VERSION )
+        #    {
+        #        info(strFmt("@SYS65329" + ' ' + "@SYS65330", containerLayoutVersion, #TRACE_CONTAINER_LAYOUT_VERSION));
+        #        return;
+        #    }
+        #    if (!globalCache)
+        #        globalCache = appl.globalCache();
+        #
+        #    globProfileWhat = globalCache.get("eeSQLTraceWhat","ProfileWhat",0);
+        #    traceTableList = globalCache.get("eeSQLTrace","TraceInfo",[-1]);
+        #    traceOperationList = globalCache.get("eeSQLTrace","TraceOperation",[-1]);
+        #    if (conlen(traceTableList) == 0 || conpeek(traceTableList,1) == -1)
+        #    {
+        #        traceTableList = connull();
+        #        traceOperationList = connull();
+        #        while select eeUserTrace where eeUserTrace.UserID == curUserID()
+        #        {
+        #            traceTableList += eeUserTrace.SelectedTableID;
+        #            traceOperationList += eeUserTrace.TraceSelect + (eeUserTrace.TraceInsert * 2) +
+        #                    (eeUserTrace.TraceUpdate * 4) + (eeUserTrace.TraceUpdate * 8);
+        #        }
+        #        globalCache.set("eeSQLTrace","TraceInfo",traceTableList);
+        #        globalCache.set("eeSQLTrace","TraceOperation",traceOperationList);
+        #    }
+        #
+        #    tableList = conpeek(_traceInfo,12);
+        #
+        #// KJK call to profiling utility
+        #
+        #    if (conpeek(_traceInfo,1) == SqlTraceCategory::QueryTime)
+        #    {
+        #        sqlStr = conpeek(_traceInfo,4);
+        #        sqlStr = substr(sqlstr,1,6);
+        #
+        #        // call to profiling utility
+        #        if (globProfileWhat)
+        #            eeTraceUtils::PerformTableCount(tableList,traceTableList,globProfileWhat,sqlStr,conpeek(_traceInfo,#SYS_TRACE_SQL_EXECUTION_TIME));
+        #    }
+        #
+        #    if ((conpeek(_traceInfo,1) == SqlTraceCategory::Statement) ||
+        #        (conpeek(_traceInfo,1) == SqlTraceCategory::QueryTime))
+        #    {
+        #        if ((conlen(traceTableList) != 0) && (confind(traceTableList,0)) == 0)
+        #        {
+        #            for  (iLoop = 1; iLoop <= conlen(tableList); iLoop +=1)
+        #            {
+        #                iFound = confind(traceTableList,conpeek(tableList,iLoop));
+        #                if (iFound > 0)   // kjk - removing redundant check && (conpeek(_traceInfo,1) == SqlTraceCategory::Statement))
+        #                {
+        #                    switch (sqlStr)
+        #                    {
+        #                        case "SELECT":
+        #                            if (conpeek(traceOperationList,iFound) & 1)
+        #                                break;
+        #                            else
+        #                            {
+        #                                iFound = 0;
+        #                                break;
+        #                            }
+        #                        case "INSERT":
+        #                            if (conpeek(traceOperationList,iFound) & 2)
+        #                                break;
+        #                            else
+        #                            {
+        #                                iFound = 0;
+        #                                break;
+        #                            }
+        #                        case "UPDATE":
+        #                            if (conpeek(traceOperationList,iFound) & 4)
+        #                                break;
+        #                            else
+        #                            {
+        #                                iFound = 0;
+        #                                break;
+        #                            }
+        #                        case "DELETE":
+        #                            if (conpeek(traceOperationList,iFound) & 8)
+        #                                break;
+        #                            else
+        #                            {
+        #                                iFound = 0;
+        #                                break;
+        #                            }
+        #                    }
+        #                }
+        #                if (iFound)
+        #                    break;
+        #            }
+        #            if (iFound == 0)
+        #                return;
+        #        }
+        #    }
+        #    super(_traceType, _traceInfo);
+        #
+        #    switch (_traceType)
+        #    {
+        #        case SysTraceType::DBTrace:  // to come
+        #            break;
+        #        case SysTraceType::SQLTrace:
+        #            SysTraceSql::newSysTraceSql(_traceInfo).output();
+        #            break;
+        #    }
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Business Solutions-Axapta Class: SysTrace unloaded at Wednesday 12/21/2005
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #SysTrace
+    PROPERTIES
+      Name                #SysTrace
+      Extends             #
+      RunOn               #Called from
+    ENDPROPERTIES
+    
+    METHODS
+      Version: 3
+      SOURCE #outputTable
+        #void outputTable(str any_describing_text = '')
+        #{
+        #    SysTraceTableSQL SysTraceTableSQL;
+        #    eeSQLTraceExtension eeSQLTraceExtension;
+        #    sysTraceTable sysTraceTable;
+        #    TableId tableId;
+        #    Connection Con = new Connection();
+        #    Statement Stmt = Con.createStatement();
+        #    ResultSet R;
+        #    str sqlStr;
+        #    real tranID = 0;
+        #    int iPos;
+        #    SysGlobalCache globalCache = appl.globalCache();
+        #    int globProfileBlocks;             // 0 = no blocking tracked, 1 = blocking tracking active - need to capture TranIDs
+        #    ;
+        #    if ( ConLen(_sysTraceInfo) >= #SYS_TRACE_SQL_TABLES )
+        #        tableId = conPeek(_sysTraceInfo,#SYS_TRACE_SQL_TABLES);
+        #
+        #    if (   tableId == tablenum(SysTraceTableSQL)
+        #        || tableId == tablenum(SysTraceTableSQLExecPlan)
+        #        || tableId == tablenum(SysTraceTableSQLTabRef)
+        #        || tableId == tablenum(SysTraceTableSQL)
+        #        )
+        #        return;
+        #
+        #    if(_sysTraceType == SysTraceType::SqlTrace)
+        #    {
+        #        SysTraceTableSQL = SysTraceTableSQL::CreateFromContainer(_sysTraceInfo);
+        #        globProfileBlocks = globalCache.get("eeSQLTraceWhat","ProfileBlocks",0);
+        #        if (globProfileBlocks == 0)   // need to initialize it
+        #        {
+        #            if (eeTraceUtils::isBlockingRunning())
+        #                globProfileBlocks = 1;
+        #            else
+        #                globProfileBlocks = -1;
+        #            globalCache.set("eeSQLTraceWhat","ProfileBlocks", globProfileBlocks);
+        #        }
+        #        if (((SysTraceTableSQL.IsStartedWithinTransaction) || SysTraceTableSQL.StatementType != StatementType::Select) && globProfileBlocks == 1)
+        #        {
+        #            sqlStr = "select req_TransactionID from master.dbo.syslockinfo with (NOLOCK) where req_TransactionID <> 0 and req_SPID = " + int2str(systracetablesql.ConnectionSPID);
+        #            R = Stmt.executeQuery(sqlStr);
+        #            while (R.next())
+        #                 tranID = R.getReal(1);
+        #
+        #            eeSQLTraceExtension.SQLTraceRecID = SysTraceTableSQL.RecId;
+        #            eeSQLTraceExtension.SQLTransactionID = tranID;
+        #            eeSQLTraceExtension.TopOfCallStack = substr(SysTraceTableSQL.callStack,1,strfind(SysTraceTableSQL.callStack,num2char(10),1,strlen(SysTraceTableSQL.callStack))-1);
+        #            iPos = StrScan(eeSQLTraceExtension.TopOfCallStack," - line",1,strlen(eeSQLTraceExtension.TopOfCallStack));
+        #            if (iPos == 0)
+        #            {
+        #                eeSQLTraceExtension.MethodCalled = eeSQLTraceExtension.TopOfCallStack;
+        #            }
+        #            else
+        #            {
+        #                eeSQLTraceExtension.MethodCalled = substr(eeSQLTraceExtension.TopOfCallStack,1,iPos-1);
+        #                eeSQLTraceExtension.LineNumber = str2int(substr(eeSQLTraceExtension.TopOfCallStack,iPos + 7,strlen(eeSQLTraceExtension.TopOfCallStack)-(iPos + 6)));
+        #            }
+        #            eeSQLTraceExtension.insert();
+        #        }
+        #    }
+        #}
+        #
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: PRN
+
+; Microsoft Business Solutions-Axapta Project : eeSQLTraceEnhancementsTwo unloaded at Wednesday 12/21/2005
+; --------------------------------------------------------------------------------
+  PROJECTVERSION 2
+  
+  PROJECT #eeSQLTraceEnhancementsTwo
+   PRIVATE
+  PROPERTIES
+    Name                #eeSQLTraceEnhancementsTwo
+  ENDPROPERTIES
+  
+    BEGINNODE
+      FILETYPE 0
+      UTILTYPE 45
+      UTILOBJECTID 61441
+      NODETYPE 329
+      NAME #Application
+    ENDNODE
+    BEGINNODE
+      FILETYPE 0
+      UTILTYPE 45
+      UTILOBJECTID 3146
+      NODETYPE 329
+      NAME #SysTrace
+    ENDNODE
+  ENDPROJECT
+  
+
+***Element: END

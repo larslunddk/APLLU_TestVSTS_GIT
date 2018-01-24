@@ -1,0 +1,2 @@
+select  (case when [Type]=11 then 'Form' when [Type]=18 then 'Report' when [Type]=85 then 'SSRSReport' end)  ,count(*) from SysUtilElementsLog group by [type]
+select (case when [Type]=11 then 'Form' when [Type]=18 then 'Report' when [Type]=85 then 'SSRSReport' end),* from SysUtilElementsLog

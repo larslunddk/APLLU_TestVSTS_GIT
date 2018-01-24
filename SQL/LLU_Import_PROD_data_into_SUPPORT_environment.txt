@@ -1,0 +1,14 @@
+--############# IMPORT BATCHHISTORY FROM PROD #############
+--declare @datefrom datetime = dateadd(day, -3, getdate())
+--insert into [dbo].[BATCHHISTORY] select * From AG01AX.AX2012_PROD.dbo.BATCHHISTORY PRODHIST
+--		where PRODHIST.[STARTDATETIME]>=@datefrom
+
+--############# RESEARCH ON BACKGROUND TABLES
+--select top 100 * from SYSTEMSEQUENCES where TABID = 2272
+--select max(recid) from [BATCHHISTORY]
+--select top 100 * from SQLDICTIONARY where fieldid = 0 and name = 'BATCHHISTORY'
+
+--############# Update system sequences accordingly
+--update SYSTEMSEQUENCES set NEXTVAL = (select max(recid) from [BATCHHISTORY])+1
+--	where TABID = 2272
+--select top 100 * from SYSTEMSEQUENCES where TABID = 2272

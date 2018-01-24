@@ -1,0 +1,19 @@
+---På sekundær SQL server------------------------------------------------------------------
+use AX2012_PROD_Selectedtables_20170630
+drop table inventJournalTable
+drop table inventJournalTrans
+
+select * into AX2012_PROD_Selectedtables_20170630.dbo.inventJournalTable from AX2012_PROD.dbo.inventJournalTable where DATAAREAID = 'is01' and posted = 1
+select * into AX2012_PROD_Selectedtables_20170630.dbo.inventJournalTrans from AX2012_PROD.dbo.inventJournalTrans where DATAAREAID = 'is01' and exists (select 1 from AX2012_PROD.dbo.inventJournalTable Ijt where ijt.DATAAREAID = 'is01' and ijt.POSTED = 1 and ijt.JOURNALID = INVENTJOURNALTRANS.JOURNALID)
+
+
+---I PROD----------------------------------------------------------------------------------
+insert into AX2012_PROD.dbo.inventJournalTable  
+	select * from [AX2012_PROD_Selectedtables_20170630].dbo.inventJournalTable  
+	where not exists (select 1 from [AX2012_PROD].dbo.inventJournalTable t1 
+						where t1.recid = [AX2012_PROD_Selectedtables_20170630].dbo.inventJournalTable.recid)
+
+insert into AX2012_PROD.dbo.inventJournalTrans  
+	select * from [AX2012_PROD_Selectedtables_20170630].dbo.inventJournalTrans  
+		where not exists (select 1 from [AX2012_PROD].dbo.inventJournalTrans t1 
+						where t1.recid = [AX2012_PROD_Selectedtables_20170630].dbo.inventJournalTrans.recid)

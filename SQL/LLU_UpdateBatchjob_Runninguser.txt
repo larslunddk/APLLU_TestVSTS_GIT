@@ -1,0 +1,8 @@
+select top 100 * from BATCHJOB where caption like  '%min job%'
+
+--  update [BATCHJOB] set CREATEDBY = 'SA_P_BAT' where RECID = 5637412340
+--  update [BATCH] set EXECUTEDBY = 'SA_P_BAT', CREATEDBY = 'SA_P_BAT' where BATCHJOBID = 5637412340
+--  update [BATCHCONSTRAINTS] set  CREATEDBY = 'SA_P_BAT' where exists (select 1 from batch where batch.recid = batchconstraints.batchid and batch.BATCHJOBID = 5637412340)
+
+--  update [BATCHJOB] set CREATEDBY = 'frege' where RECID = 5637363591
+--  update [BATCH] set EXECUTEDBY = 'frege', CREATEDBY = 'frege' where BATCHJOBID = 5637363591

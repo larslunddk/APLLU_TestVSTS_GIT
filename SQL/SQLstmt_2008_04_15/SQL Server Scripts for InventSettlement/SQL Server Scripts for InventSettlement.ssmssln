@@ -1,0 +1,9 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "SQL Server Scripts for InventSettlement", "SQL Server Scripts for InventSettlement\SQL Server Scripts for InventSettlement.ssmssqlproj", "{C9178A04-C37A-4685-A6AF-FCB2871B5AD4}"
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

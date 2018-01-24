@@ -1,0 +1,59 @@
+drop procedure FindMissingJobs
+go
+create procedure FindMissingJobs @date date
+as
+begin
+	select @Date as [Date], 1 as count, RetailConnSchedule.Name, SCHEDULERJOBID, --RETAILCDXSCHEDULEDATAGROUP.DATAGROUP, 
+	RetailCDXDataGroup.NAME as DatastoreName, RetailConnDatabaseProfile.NAME as channelName
+	--,'zzzzz' as zzzzz,RetailConnDatabaseProfile.RECID, RetailConnScheduleJobMapping.SCHEDULERJOBID 
+	from RetailConnSchedule
+	join RetailConnScheduleJobMapping on 
+	RetailConnScheduleJobMapping.SCHEDULERECID = RetailConnSchedule.RECID
+	join RETAILCDXSCHEDULEDATAGROUP on
+	RETAILCDXSCHEDULEDATAGROUP.SCHEDULE = RetailConnSchedule.RECID 
+	join RetailCDXDataGroup on
+	RetailCDXDataGroup.RECID = RETAILCDXSCHEDULEDATAGROUP.DATAGROUP
+	join RetailConnDatabaseProfile on
+	RetailConnDatabaseProfile.DATAGROUP = RetailCDXDataGroup.RECID
+	where RetailConnSchedule.name = '_daily'
+	and SCHEDULERJOBID = '1040'
+	and not exists	(select 1 from
+				RetailCDXDownloadSessionDataStore t1
+				join RetailCDXDownloadSession t2
+					on t1.SESSION_ = t2.RECID
+				join RetailConnDatabaseProfile t3
+					on t3.RECID = t1.DATASTORE
+				where t1.DATEAPPLIED >= @Date --'20170415' --DATEADD(DAY,-1, GETDATE())
+				and t1.DATEAPPLIED < DATEADD(DAY,1, @Date)
+				and t1.DATASTORE = RetailConnDatabaseProfile.RECID
+				and t2.JOBID = RetailConnScheduleJobMapping.SCHEDULERJOBID
+				)
+end
+go
+
+DECLARE @StartDate AS DATETIME = '20170415'
+WHILE (@StartDate < GetDate())
+BEGIN
+	--select @StartDate
+	exec FindMissingJobs @StartDate
+    SET @StartDate = DateAdd(day,1,@StartDate)
+END
+--exec FindMissingJobs '20170415'
+--exec FindMissingJobs '20170416'
+--exec FindMissingJobs '20170417'
+
+
+--select * from
+--			RetailCDXDownloadSessionDataStore t1
+--			join RetailCDXDownloadSession t2
+--				on t1.SESSION_ = t2.RECID
+--			join RetailConnDatabaseProfile t3
+--				on t3.RECID = t1.DATASTORE
+--			where t1.DATEAPPLIED >= '20170403' --DATEADD(DAY,-1, GETDATE())
+--			and t1.DATEAPPLIED < '20170404' --DATEADD(DAY,0, GETDATE())
+--			and t1.DATASTORE = 5637146076 --RetailConnDatabaseProfile.RECID
+--			and t2.JOBID = '1040' --RetailConnScheduleJobMapping.SCHEDULERJOBID
+
+
+
+

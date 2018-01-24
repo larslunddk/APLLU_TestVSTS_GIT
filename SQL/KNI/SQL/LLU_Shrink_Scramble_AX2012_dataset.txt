@@ -1,0 +1,17 @@
+select top 10 * from SALESPARMLINE
+
+
+--delete from INVENTTRANS where DATEFINANCIAL < dateadd(month, -1, GETDATE())
+--update INVENTTRANS set COSTAMOUNTPHYSICAL = 0, COSTAMOUNTPOSTED = 0, COSTAMOUNTSETTLED = 0, COSTAMOUNTSTD = 0
+
+--delete from RETAILTRANSACTIONPAYMENTTRANS where Transdate < dateadd(month, -1, GETDATE())
+--delete from RETAILTRANSACTIONTABLE where Transdate < dateadd(month, -1, GETDATE())
+--update RETAILTRANSACTIONTABLE set COSTAMOUNT = 0
+
+--delete from RETAILTRANSACTIONSALESTRANS where Transdate < dateadd(month, -1, GETDATE())
+--update RETAILTRANSACTIONSALESTRANS set COSTAMOUNT = 0
+
+--delete from TAXTRANS where Transdate < dateadd(month, -1, GETDATE())
+
+--delete from INVENTSETTLEMENT where TRANSBEGINTIME < dateadd(month, -1, GETDATE())
+--update INVENTSETTLEMENT set COSTAMOUNTSETTLED = 0

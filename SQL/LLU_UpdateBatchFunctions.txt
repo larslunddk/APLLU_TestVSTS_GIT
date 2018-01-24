@@ -1,0 +1,12 @@
+select top 100 * from BATCHJOB where caption = 'LOG: WMS log retry processing'
+
+  update [BATCHJOB] set CREATEDBY = 'SA_P_BAT' where RECID = 5637392086
+  update [BATCH] set EXECUTEDBY = 'SA_P_BAT', CREATEDBY = 'SA_P_BAT' where BATCHJOBID = 5637392086
+
+  select top 100 BATCHJOB.CAPTION,BATCHJOB.STATUS, dbo.[ENUM2STR]('BatchStatus',BATCHJOB.STATUS) StatusTxt,* from EGBCBATCHJOB
+  join BATCHJOB on
+  BATCHJOB.RECID = EGBCBATCHJOB.BATCHJOB
+  where batchjob.CAPTION like '%invoice%'
+  
+  update EGBCBATCHJOB set EXECUTIONTIMETHRESHOLDERROR = 1260, EXECUTIONTIMETHRESHOLDWARNING = 900
+  where batchjob = 5637320250

@@ -1,0 +1,327 @@
+Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: DBT
+
+; Axapta Table : LP_LogTable unloaded at Torsdag 22-05-2008
+; --------------------------------------------------------------------------------
+  TABLEVERSION 1
+  
+  TABLE #LP_LogTable
+    PROPERTIES
+      Name                #LP_LogTable
+      Label               #
+      FormRef             #
+      TitleField1         #
+      TitleField2         #
+      Temporary           #No
+      FeatureKey          #
+      MaxAccessMode       #Delete
+      CacheLookup         #None
+      CreateRecIdIndex    #No
+      SaveDataPerCompany  #Yes
+      TableGroup          #Miscellaneous
+      PrimaryIndex        #FromDateTimeJobIdx
+      ClusterIndex        #FromDateTimeJobIdx
+      ModifiedDate        #Yes
+      ModifiedTime        #Yes
+      ModifiedBy          #Yes
+      ModifiedTransactionId #Yes
+      CreatedDate         #No
+      CreatedTime         #No
+      CreatedBy           #No
+      CreatedTransactionId #No
+    ENDPROPERTIES
+    
+    FIELDS
+      FIELD #SessionId
+        INT
+        PROPERTIES
+          Type                #Integer
+          Name                #SessionId
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #LP_LogTable
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #SessionId
+              #
+            ENDARRAY
+          FieldUpdate         #Absolute
+        ENDPROPERTIES
+        
+      FIELD #Txt
+        STRING
+        PROPERTIES
+          Type                #String
+          Name                #Txt
+          Label               #Text
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #LP_LogTable
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #
+              #
+            ENDARRAY
+          StringSize          #80
+          Adjustment          #Left
+        ENDPROPERTIES
+        
+      FIELD #LogDate
+        DATE
+        PROPERTIES
+          Type                #Date
+          Name                #LogDate
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #LP_LogTable
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #FromDate
+              #
+            ENDARRAY
+        ENDPROPERTIES
+        
+      FIELD #LogTime
+        TIME
+        PROPERTIES
+          Type                #Time
+          Name                #LogTime
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #LP_LogTable
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #FromTime
+              #
+            ENDARRAY
+        ENDPROPERTIES
+        
+      FIELD #RelatedFromDate
+        DATE
+        PROPERTIES
+          Type                #Date
+          Name                #RelatedFromDate
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #LP_LogTable
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #ToDate
+              #
+            ENDARRAY
+        ENDPROPERTIES
+        
+      FIELD #RelatedFromTime
+        TIME
+        PROPERTIES
+          Type                #Time
+          Name                #RelatedFromTime
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #LP_LogTable
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #ToTime
+              #
+            ENDARRAY
+        ENDPROPERTIES
+        
+      FIELD #Jobcode
+        STRING
+        PROPERTIES
+          Type                #String
+          Name                #Jobcode
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #LP_LogTable
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #
+              #
+            ENDARRAY
+          StringSize          #30
+          Adjustment          #Left
+        ENDPROPERTIES
+        
+      FIELD #StartEnd
+        ENUM
+        PROPERTIES
+          Type                #Enum
+          Name                #StartEnd
+          Label               #@SYS23217
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #LP_LogTable
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #
+              #
+            ENDARRAY
+          EnumType            #StartEnd
+        ENDPROPERTIES
+        
+    ENDFIELDS
+    GROUPS
+      GROUP #AutoReport
+        GROUPFIELDS
+        ENDGROUPFIELDS
+      ENDGROUP
+      GROUP #AutoLookup
+        GROUPFIELDS
+        ENDGROUPFIELDS
+      ENDGROUP
+    ENDGROUPS
+    
+    INDICES
+      #JobDateTimeIdx
+      PROPERTIES
+        Name                #JobDateTimeIdx
+        AllowDuplicates     #Yes
+        Enabled             #Yes
+        FeatureKey          #
+      ENDPROPERTIES
+      
+      INDEXFIELDS
+        #Jobcode
+        #StartEnd
+        #LogDate
+        #LogTime
+      ENDINDEXFIELDS
+      
+      #FromDateTimeJobIdx
+      PROPERTIES
+        Name                #FromDateTimeJobIdx
+        AllowDuplicates     #No
+        Enabled             #Yes
+        FeatureKey          #
+      ENDPROPERTIES
+      
+      INDEXFIELDS
+        #LogDate
+        #LogTime
+        #Jobcode
+        #StartEnd
+      ENDINDEXFIELDS
+      
+    ENDINDICES
+    REFERENCES
+    ENDREFERENCES
+    
+    DELETEACTIONS
+    ENDDELETEACTIONS
+    
+    METHODS
+      Version: 3
+      SOURCE #InsertSimple
+        #static void InsertSimple(Str 100 _Txt, Str 30 _JobCode = 'none', StartEnd _StartEnd = StartEnd::None)
+        #{
+        #    LP_LogTable LP_LogTable;
+        #    LP_LogTable PrevLP_LogTable;
+        #    ;
+        #    ttsbegin;
+        #    LP_LogTable.LogDate    = SystemDateGet();
+        #    LP_LogTable.LogTime    = timenow();
+        #    LP_LogTable.Txt         = _Txt;
+        #    LP_LogTable.Jobcode     = _JobCode;
+        #    LP_LogTable.StartEnd    = _StartEnd;
+        #    LP_LogTable.SessionId   = sessionid();
+        #    if (_StartEnd == StartEnd::End)
+        #    {
+        #        select reverse firstonly PrevLP_LogTable order by JobCode,LogDate,LogTime
+        #            where   PrevLP_LogTable.JobCode == _JobCode
+        #            &&      PrevLP_LogTable.StartEnd == StartEnd::Start;
+        #        LP_LogTable.RelatedFromDate = PrevLP_LogTable.LogDate;
+        #        LP_LogTable.RelatedFromTime = PrevLP_LogTable.LogTime;
+        #    }
+        #    LP_LogTable.insert();
+        #    ttscommit;
+        #
+        #}
+        #
+      ENDSOURCE
+      SOURCE #TestInsert
+        #static void TestInsert()
+        #{
+        #    LP_LogTable LP_LogTable;
+        #    ;
+        #    ttsbegin;
+        #    LP_LogTable.LogDate    = SystemDateGet();
+        #    LP_LogTable.LogTime    = timenow();
+        #    LP_LogTable.Txt         = 'MyTxt';
+        #    LP_LogTable.Jobcode     = 'InvTransUpdate';
+        #    LP_LogTable.StartEnd    = StartEnd::Start; //Enum value 1
+        #    LP_LogTable.SessionId   = sessionid();
+        #    LP_LogTable.insert();
+        #    ttscommit;
+        #
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDTABLE
+  
+
+***Element: END

@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<SqlWorkbenchSqlProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="Widex_NewInventStrucure_SQL">
+  <Items>
+    <LogicalFolder Name="Connections" Type="2" Sorted="true">
+      <Items>
+        <ConnectionNode Name="widexsql12:WIDEXDK\lalu">
+          <Created>2008-03-12T14:13:42.5662486+01:00</Created>
+          <Type>SQL</Type>
+          <Server>widexsql12</Server>
+          <UserName />
+          <Authentication>Windows Authentication</Authentication>
+          <InitialDB>widsql3_cit_1</InitialDB>
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Queries" Type="0" Sorted="true">
+      <Items>
+        <FileNode Name="ResetPsw_CreateBMSSA.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>ResetPsw_CreateBMSSA.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step1003_UpdateInventTxt_in_MAS_5_3.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step1003_UpdateInventTxt_in_MAS_5_3.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x_50Step1_CreateDatabase.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x_50Step1_CreateDatabase.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step9999_SaveLog.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step9999_SaveLog.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step7b_InventDim_SerialBatch_NOTFINISHED.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step7b_InventDim_SerialBatch_NOTFINISHED.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step2a_updateInventSerialId.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step2a_updateInventSerialId.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step0_SetNextRecID_in_MasterfromWID.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step0_SetNextRecID_in_MasterfromWID.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step1_MakeStoredProcedures.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step1_MakeStoredProcedures.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step1001_LLU_Delete_inventitemlocation_dubletter_after_newItemId.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step1001_LLU_Delete_inventitemlocation_dubletter_after_newItemId.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step2b_UpdateInventDim.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step2b_UpdateInventDim.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step1002_InventSettlementUpd.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step1002_InventSettlementUpd.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step4_EliminateDublicatedRecIds.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step4_EliminateDublicatedRecIds.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step7_PriceCubeData_InventBatch_PriceDiscTable.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step7_PriceCubeData_InventBatch_PriceDiscTable.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step8_Cleanup.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step8_Cleanup.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step3_CreateUpdateInventTableShadow.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step3_CreateUpdateInventTableShadow.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step5_CreateViewsBeforeReturnUpdate.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step5_CreateViewsBeforeReturnUpdate.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Step6_InsertShadowrecordsInInventTable.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:widexsql12:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>widexsql12</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Step6_InsertShadowrecordsInInventTable.sql</FullPath>
+        </FileNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Miscellaneous" Type="3" Sorted="true">
+      <Items>
+        <FileNode Name="sqlcmd_DoUpdate.bat">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>sqlcmd_DoUpdate.bat</FullPath>
+        </FileNode>
+      </Items>
+    </LogicalFolder>
+  </Items>
+</SqlWorkbenchSqlProject>

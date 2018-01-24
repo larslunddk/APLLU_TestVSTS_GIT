@@ -1,0 +1,1834 @@
+Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: FTM
+
+; Axapta Menu Item: ErrTable udlæst ved Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+  MENUFUNCTIONVERSION 1
+  
+  MENUFUNCTION #ErrTable
+    Type: 1
+    PROPERTIES
+      Name                #ErrTable
+      Label               #Fejl og ønsker - Axapta
+      HelpText            #
+      Class               #Form
+      Object              #ErrTable
+      Parameters          #
+      EnumTypeParameter   #
+      EnumParameter       #
+      RunOn               #Called from
+      FeatureKey          #
+      NeededAccessLevel   #NoAccess
+      MultiSelect         #No
+      Web                 #
+      WebAccess           #None
+      WebSecureTransaction #No
+    ENDPROPERTIES
+    
+  ENDMENUFUNCTION
+
+***Element: DBT
+
+; Axapta Table : ErrTypeTable unloaded at Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+  TABLEVERSION 1
+  
+  TABLE #ErrTypeTable
+    PROPERTIES
+      Name                #ErrTypeTable
+      Label               #
+      FormRef             #
+      TitleField1         #
+      TitleField2         #
+      Temporary           #No
+      FeatureKey          #
+      MaxAccessMode       #Delete
+      CacheLookup         #None
+      CreateRecIdIndex    #No
+      SaveDataPerCompany  #Yes
+      TableGroup          #Miscellaneous
+      PrimaryIndex        #
+      ClusterIndex        #
+      ModifiedDate        #No
+      ModifiedTime        #No
+      ModifiedBy          #No
+      ModifiedTransactionId #No
+      CreatedDate         #No
+      CreatedTime         #No
+      CreatedBy           #No
+      CreatedTransactionId #No
+    ENDPROPERTIES
+    
+    FIELDS
+      FIELD #ErrType
+        STRING
+        PROPERTIES
+          Type                #Streng
+          Name                #ErrType
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrTypeTable
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #ErrType
+              #
+            ENDARRAY
+          StringSize          #10
+          Adjustment          #Left
+        ENDPROPERTIES
+        
+    ENDFIELDS
+    GROUPS
+      GROUP #AutoReport
+        GROUPFIELDS
+        ENDGROUPFIELDS
+      ENDGROUP
+    ENDGROUPS
+    
+    INDICES
+    ENDINDICES
+    REFERENCES
+    ENDREFERENCES
+    
+    DELETEACTIONS
+    ENDDELETEACTIONS
+    
+  ENDTABLE
+  
+
+***Element: FRM
+
+; Axapta Forms unloaded at Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+FRMVERSION 4
+
+FORM #ErrTable
+  PROPERTIES
+    Name                #ErrTable
+  ENDPROPERTIES
+  
+  METHODS
+    Version: 3
+    SOURCE #classDeclaration
+      #class FormRun extends ObjectRun
+      #{
+      #
+      #}
+    ENDSOURCE
+  ENDMETHODS
+  OBJECTBANK
+    DATASOURCE
+      OBJECTPOOL
+        PROPERTIES
+          Name                #ErrorRep_Table
+          Table               #ErrorRep_Table
+          Index               #
+          Company             #
+          CounterField        #
+          AllowCheck          #Yes
+          AllowEdit           #Yes
+          AllowCreate         #Yes
+          AllowDelete         #Yes
+          StartPosition       #First
+          AutoSearch          #Yes
+          AutoNotify          #Yes
+          AutoQuery           #Yes
+          OnlyFetchActive     #No
+          JoinSource          #
+          LinkType            #Delayed
+          DelayActive         #Yes
+          InsertAtEnd         #Yes
+          InsertIfEmpty       #Yes
+        ENDPROPERTIES
+        
+        FIELDLIST
+        ENDFIELDLIST
+      ENDOBJECTPOOL
+    ENDDATASOURCE
+  ENDOBJECTBANK
+  
+  JOINS
+  ENDJOINS
+  
+  DESIGN
+    PROPERTIES
+      Left                #Auto (left)
+      Top                 #Auto
+      Width               #Auto
+      Height              #Auto
+      Visible             #Yes
+      Caption             #Fejlrapportering Axapta 3.0
+      TitleDatasource     #
+      Frame               #Standard
+      WindowResize        #Auto
+      WindowType          #Standard
+      SaveSize            #No
+      AlwaysOnTop         #No
+      HideToolbar         #No
+      setCompany          #Yes
+      ColorScheme         #Default
+      CssClass            #
+      ShowWebHelp         #Default
+      BackgroundColor     #Button face (3D)
+      ImageName           #
+      ImageResource       #0
+      Imagemode           #Normal (preserve pict. attributes)
+      Mode                #Watch
+      SupportReload       #No
+      Font                #
+      FontSize            #0
+      Italic              #No
+      Underline           #No
+      Bold                #Default
+      CharacterSet        #0
+      LabelFont           #
+      LabelFontSize       #0
+      LabelItalic         #No
+      LabelUnderline      #No
+      LabelBold           #Default
+      LabelCharacterSet   #0
+      DataSource          #
+      TopMargin           #Auto
+      BottomMargin        #Auto
+      LeftMargin          #Auto
+      RightMargin         #Auto
+      ArrangeWhen         #Default
+      ArrangeMethod       #Vertical
+      Columns             #2
+      Columnspace         #Auto
+      ArrangeGuide        
+        ARRAY INDEX Columns 
+          #0
+          #0
+        ENDARRAY
+      HideIfEmpty         #Yes
+      AlignChildren       #Yes
+      AlignChild          #Yes
+    ENDPROPERTIES
+    
+    CONTAINER
+      CONTROL TAB
+        PROPERTIES
+          Name                #Tab
+          AutoDeclaration     #No
+          Visible             #Yes
+          AllowEdit           #Yes
+          Left                #Auto (left)
+          Top                 #Auto
+          Width               #Auto
+          Height              #Auto
+          VerticalSpacing     #Auto
+          Enabled             #Yes
+          Skip                #No
+          AlignControl        #No
+          HelpText            #
+          FeatureKey          #
+          DragDrop            #None
+          ColorScheme         #Default
+          BackgroundColor     #Button face (3D)
+          BackStyle           #Opaque
+          Tabs                #0
+          Tab                 #1
+          ShowTabs            #Yes
+          TabPlacement        #top
+          TabLayout           #One line
+          SelectControl       #Yes
+          DataSource          #
+          TopMargin           #Auto
+          BottomMargin        #Auto
+          LeftMargin          #Auto
+          RightMargin         #Auto
+          ArrangeWhen         #Default
+          ArrangeMethod       #Vertical
+          Columns             #2
+          Columnspace         #Auto
+          ArrangeGuide        
+            ARRAY INDEX Columns 
+              #0
+              #0
+            ENDARRAY
+          HideIfEmpty         #Yes
+          AlignChildren       #Yes
+          AlignChild          #No
+          TabAutoChange       #Yes
+        ENDPROPERTIES
+        
+        CONTAINER
+          CONTROL TABPAGE
+            PROPERTIES
+              Name                #Overview
+              AutoDeclaration     #No
+              Visible             #Yes
+              AllowEdit           #Yes
+              Left                #Auto (left)
+              Top                 #Auto
+              Width               #Auto
+              Height              #Auto
+              VerticalSpacing     #Auto
+              Enabled             #Yes
+              Skip                #No
+              AlignControl        #No
+              HelpText            #
+              FeatureKey          #
+              DragDrop            #None
+              ColorScheme         #Default
+              BackgroundColor     #Button face (3D)
+              BackStyle           #Opaque
+              Caption             #Oversigt
+              DataSource          #
+              TopMargin           #Auto
+              BottomMargin        #Auto
+              LeftMargin          #Auto
+              RightMargin         #Auto
+              ArrangeWhen         #Default
+              ArrangeMethod       #Vertical
+              Columns             #1
+              Columnspace         #Auto
+              ArrangeGuide        
+                ARRAY INDEX Columns 
+                  #0
+                ENDARRAY
+              HideIfEmpty         #Yes
+              AlignChildren       #Yes
+              AlignChild          #Yes
+              TabAutoChange       #No
+            ENDPROPERTIES
+            
+            CONTAINER
+              CONTROL GRID
+                PROPERTIES
+                  Name                #Grid
+                  AutoDeclaration     #No
+                  Visible             #Yes
+                  AllowEdit           #Yes
+                  Left                #Auto (left)
+                  Top                 #Auto
+                  Width               #Auto
+                  Height              #Auto
+                  VerticalSpacing     #Auto
+                  Enabled             #Yes
+                  Skip                #No
+                  AlignControl        #No
+                  HelpText            #
+                  FeatureKey          #
+                  DragDrop            #None
+                  ColorScheme         #Default
+                  BackgroundColor     #Window background
+                  TopMargin           #0
+                  BottomMargin        #0
+                  LeftMargin          #0
+                  RightMargin         #0
+                  MultiSelect         #Yes
+                  VisibleCols         #Auto
+                  VisibleRows         #Auto
+                  ShowColLabels       #Yes
+                  ShowRowLabels       #Yes
+                  HighlightActive     #Yes
+                  ActiveBackColor     #Highlight background
+                  ActiveForeColor     #Highlight text
+                  DataSource          #ErrorRep_Table
+                ENDPROPERTIES
+                
+                  CONTAINER
+                    CONTROL INTEDIT
+                      PROPERTIES
+                        Name                #ErrorRep_Table_ErrNumber
+                        AutoDeclaration     #No
+                        Visible             #Yes
+                        AllowEdit           #No
+                        Left                #Auto (left)
+                        Top                 #Auto
+                        Width               #Auto
+                        Height              #Auto
+                        VerticalSpacing     #Auto
+                        Enabled             #Yes
+                        Skip                #No
+                        AlignControl        #Yes
+                        HelpText            #
+                        FeatureKey          #
+                        DragDrop            #None
+                        LookupButton        #Auto
+                        ReplaceOnLookup     #Yes
+                        SearchAfterInput    #Auto
+                        LimitText           #Auto
+                        DisplayLength       #Auto
+                        DisplayHeight       #Auto
+                        Border              #None
+                        Value               #0
+                        Alignment           #Auto
+                        SignDisplay         #Auto
+                        RotateSign          #Auto
+                        ShowZero            #Auto
+                        DisplaceNegative    #Auto
+                        AllowNegative       #Auto
+                        ColorScheme         #Default
+                        BackStyle           #Opaque
+                        BackgroundColor     #Window background
+                        ForegroundColor     #Window text
+                        Font                #
+                        FontSize            #0
+                        Italic              #No
+                        Underline           #No
+                        Bold                #Default
+                        CharacterSet        #0
+                        LabelForegroundColor #Window text
+                        ShowLabel           #Yes
+                        Label               #
+                        LabelFont           #
+                        LabelFontSize       #0
+                        LabelItalic         #No
+                        LabelUnderline      #No
+                        LabelBold           #Default
+                        LabelCharacterSet   #0
+                        LabelWidth          #Auto
+                        LabelHeight         #Auto
+                        LabelPosition       #Left
+                        LabelAlignment      #Right
+                        DataSource          #ErrorRep_Table
+                        DataField           #ErrNumber
+                        ArrayIndex          #0
+                      ENDPROPERTIES
+                      
+                    ENDCONTROL 
+                    
+                    CONTROL STRINGEDIT
+                      PROPERTIES
+                        Name                #ErrorRep_Table_ErrType
+                        AutoDeclaration     #No
+                        Visible             #Yes
+                        AllowEdit           #Yes
+                        Left                #Auto (left)
+                        Top                 #Auto
+                        Width               #Auto
+                        Height              #Auto
+                        VerticalSpacing     #Auto
+                        Enabled             #Yes
+                        Skip                #No
+                        AlignControl        #Yes
+                        HelpText            #
+                        FeatureKey          #
+                        DragDrop            #None
+                        LookupButton        #Auto
+                        ReplaceOnLookup     #Yes
+                        SearchAfterInput    #Auto
+                        LimitText           #Auto
+                        DisplayLength       #Auto
+                        DisplayHeight       #Auto
+                        Border              #None
+                        Text                #
+                        PasswordStyle       #No
+                        Alignment           #Auto
+                        ChangeCase          #Auto
+                        MultiLine           #No
+                        ColorScheme         #Default
+                        BackStyle           #Opaque
+                        BackgroundColor     #Window background
+                        ForegroundColor     #Window text
+                        Font                #
+                        FontSize            #0
+                        Italic              #No
+                        Underline           #No
+                        Bold                #Default
+                        CharacterSet        #0
+                        LabelForegroundColor #Window text
+                        ShowLabel           #Yes
+                        Label               #
+                        LabelFont           #
+                        LabelFontSize       #0
+                        LabelItalic         #No
+                        LabelUnderline      #No
+                        LabelBold           #Default
+                        LabelCharacterSet   #0
+                        LabelWidth          #Auto
+                        LabelHeight         #Auto
+                        LabelPosition       #Left
+                        LabelAlignment      #Right
+                        DataSource          #ErrorRep_Table
+                        DataField           #ErrType
+                        ArrayIndex          #0
+                      ENDPROPERTIES
+                      
+                    ENDCONTROL 
+                    
+                    CONTROL INTEDIT
+                      PROPERTIES
+                        Name                #ErrorRep_Table_ErrPriority
+                        AutoDeclaration     #No
+                        Visible             #Yes
+                        AllowEdit           #Yes
+                        Left                #Auto (left)
+                        Top                 #Auto
+                        Width               #Auto
+                        Height              #Auto
+                        VerticalSpacing     #Auto
+                        Enabled             #Yes
+                        Skip                #No
+                        AlignControl        #Yes
+                        HelpText            #
+                        FeatureKey          #
+                        DragDrop            #None
+                        LookupButton        #Auto
+                        ReplaceOnLookup     #Yes
+                        SearchAfterInput    #Auto
+                        LimitText           #Auto
+                        DisplayLength       #Auto
+                        DisplayHeight       #Auto
+                        Border              #None
+                        Value               #0
+                        Alignment           #Auto
+                        SignDisplay         #Auto
+                        RotateSign          #Auto
+                        ShowZero            #Auto
+                        DisplaceNegative    #Auto
+                        AllowNegative       #Auto
+                        ColorScheme         #Default
+                        BackStyle           #Opaque
+                        BackgroundColor     #Window background
+                        ForegroundColor     #Window text
+                        Font                #
+                        FontSize            #0
+                        Italic              #No
+                        Underline           #No
+                        Bold                #Default
+                        CharacterSet        #0
+                        LabelForegroundColor #Window text
+                        ShowLabel           #Yes
+                        Label               #
+                        LabelFont           #
+                        LabelFontSize       #0
+                        LabelItalic         #No
+                        LabelUnderline      #No
+                        LabelBold           #Default
+                        LabelCharacterSet   #0
+                        LabelWidth          #Auto
+                        LabelHeight         #Auto
+                        LabelPosition       #Left
+                        LabelAlignment      #Right
+                        DataSource          #ErrorRep_Table
+                        DataField           #ErrPriority
+                        ArrayIndex          #0
+                      ENDPROPERTIES
+                      
+                    ENDCONTROL 
+                    
+                    CONTROL STRINGEDIT
+                      PROPERTIES
+                        Name                #ErrorRep_Table_EmplId
+                        AutoDeclaration     #No
+                        Visible             #Yes
+                        AllowEdit           #Yes
+                        Left                #Auto (left)
+                        Top                 #Auto
+                        Width               #Auto
+                        Height              #Auto
+                        VerticalSpacing     #Auto
+                        Enabled             #Yes
+                        Skip                #No
+                        AlignControl        #Yes
+                        HelpText            #
+                        FeatureKey          #
+                        DragDrop            #None
+                        LookupButton        #Auto
+                        ReplaceOnLookup     #Yes
+                        SearchAfterInput    #Auto
+                        LimitText           #Auto
+                        DisplayLength       #Auto
+                        DisplayHeight       #Auto
+                        Border              #None
+                        Text                #
+                        PasswordStyle       #No
+                        Alignment           #Auto
+                        ChangeCase          #Auto
+                        MultiLine           #No
+                        ColorScheme         #Default
+                        BackStyle           #Opaque
+                        BackgroundColor     #Window background
+                        ForegroundColor     #Window text
+                        Font                #
+                        FontSize            #0
+                        Italic              #No
+                        Underline           #No
+                        Bold                #Default
+                        CharacterSet        #0
+                        LabelForegroundColor #Window text
+                        ShowLabel           #Yes
+                        Label               #
+                        LabelFont           #
+                        LabelFontSize       #0
+                        LabelItalic         #No
+                        LabelUnderline      #No
+                        LabelBold           #Default
+                        LabelCharacterSet   #0
+                        LabelWidth          #Auto
+                        LabelHeight         #Auto
+                        LabelPosition       #Left
+                        LabelAlignment      #Right
+                        DataSource          #ErrorRep_Table
+                        DataField           #EmplId
+                        ArrayIndex          #0
+                      ENDPROPERTIES
+                      
+                    ENDCONTROL 
+                    
+                    CONTROL COMBOBOX
+                      PROPERTIES
+                        Name                #ErrorRep_Table_ErrStatus
+                        AutoDeclaration     #No
+                        Visible             #Yes
+                        AllowEdit           #Yes
+                        Left                #Auto (left)
+                        Top                 #Auto
+                        Width               #Auto
+                        Height              #Auto
+                        VerticalSpacing     #Auto
+                        Enabled             #Yes
+                        Skip                #No
+                        AlignControl        #Yes
+                        HelpText            #
+                        FeatureKey          #
+                        DragDrop            #None
+                        Border              #None
+                        ComboType           #Standard
+                        Selection           #0
+                        DisplayLength       #Auto
+                        AppendNew           #No
+                        HideFirstEntry      #No
+                        ColorScheme         #Default
+                        BackStyle           #Opaque
+                        BackgroundColor     #Window background
+                        ForegroundColor     #Window text
+                        LabelForegroundColor #Window text
+                        ShowLabel           #Yes
+                        Label               #
+                        LabelFont           #
+                        LabelFontSize       #0
+                        LabelItalic         #No
+                        LabelUnderline      #No
+                        LabelBold           #Default
+                        LabelCharacterSet   #0
+                        LabelWidth          #Auto
+                        LabelHeight         #Auto
+                        LabelPosition       #Left
+                        LabelAlignment      #Right
+                        DataSource          #ErrorRep_Table
+                        DataField           #ErrStatus
+                        ArrayIndex          #0
+                      ENDPROPERTIES
+                      
+                    ENDCONTROL 
+                    
+                    CONTROL DATEEDIT
+                      PROPERTIES
+                        Name                #ErrorRep_Table_TransDate
+                        AutoDeclaration     #No
+                        Visible             #Yes
+                        AllowEdit           #Yes
+                        Left                #Auto (left)
+                        Top                 #Auto
+                        Width               #Auto
+                        Height              #Auto
+                        VerticalSpacing     #Auto
+                        Enabled             #Yes
+                        Skip                #No
+                        AlignControl        #Yes
+                        HelpText            #
+                        FeatureKey          #
+                        DragDrop            #None
+                        LookupButton        #Auto
+                        ReplaceOnLookup     #Yes
+                        SearchAfterInput    #Auto
+                        LimitText           #Auto
+                        DisplayLength       #Auto
+                        DisplayHeight       #Auto
+                        Border              #None
+                        DateValue           #
+                        Alignment           #Auto
+                        DateFormat          #Auto
+                        DateSeparator       #Auto
+                        DateYear            #Auto
+                        DateMonth           #Auto
+                        DateDay             #Auto
+                        ColorScheme         #Default
+                        BackStyle           #Opaque
+                        BackgroundColor     #Window background
+                        ForegroundColor     #Window text
+                        Font                #
+                        FontSize            #0
+                        Italic              #No
+                        Underline           #No
+                        Bold                #Default
+                        CharacterSet        #0
+                        LabelForegroundColor #Window text
+                        ShowLabel           #Yes
+                        Label               #
+                        LabelFont           #
+                        LabelFontSize       #0
+                        LabelItalic         #No
+                        LabelUnderline      #No
+                        LabelBold           #Default
+                        LabelCharacterSet   #0
+                        LabelWidth          #Auto
+                        LabelHeight         #Auto
+                        LabelPosition       #Left
+                        LabelAlignment      #Right
+                        DataSource          #ErrorRep_Table
+                        DataField           #TransDate
+                        ArrayIndex          #0
+                      ENDPROPERTIES
+                      
+                    ENDCONTROL 
+                    
+                    CONTROL STRINGEDIT
+                      PROPERTIES
+                        Name                #ErrorRep_Table_ErrHeader
+                        AutoDeclaration     #No
+                        Visible             #Yes
+                        AllowEdit           #Yes
+                        Left                #Auto (left)
+                        Top                 #Auto
+                        Width               #Auto
+                        Height              #Auto
+                        VerticalSpacing     #Auto
+                        Enabled             #Yes
+                        Skip                #No
+                        AlignControl        #Yes
+                        HelpText            #
+                        FeatureKey          #
+                        DragDrop            #None
+                        LookupButton        #Auto
+                        ReplaceOnLookup     #Yes
+                        SearchAfterInput    #Auto
+                        LimitText           #Auto
+                        DisplayLength       #Auto
+                        DisplayHeight       #Auto
+                        Border              #None
+                        Text                #
+                        PasswordStyle       #No
+                        Alignment           #Auto
+                        ChangeCase          #Auto
+                        MultiLine           #No
+                        ColorScheme         #Default
+                        BackStyle           #Opaque
+                        BackgroundColor     #Window background
+                        ForegroundColor     #Window text
+                        Font                #
+                        FontSize            #0
+                        Italic              #No
+                        Underline           #No
+                        Bold                #Default
+                        CharacterSet        #0
+                        LabelForegroundColor #Window text
+                        ShowLabel           #Yes
+                        Label               #
+                        LabelFont           #
+                        LabelFontSize       #0
+                        LabelItalic         #No
+                        LabelUnderline      #No
+                        LabelBold           #Default
+                        LabelCharacterSet   #0
+                        LabelWidth          #Auto
+                        LabelHeight         #Auto
+                        LabelPosition       #Left
+                        LabelAlignment      #Right
+                        DataSource          #ErrorRep_Table
+                        DataField           #ErrHeader
+                        ArrayIndex          #0
+                      ENDPROPERTIES
+                      
+                    ENDCONTROL 
+                    
+                  ENDCONTAINER
+                  
+              ENDCONTROL 
+              
+              CONTROL STRINGEDIT
+                PROPERTIES
+                  Name                #ErrorRep_Table_Description
+                  AutoDeclaration     #No
+                  Visible             #Yes
+                  AllowEdit           #Yes
+                  Left                #Auto (left)
+                  Top                 #Auto
+                  Width               #Column width
+                  Height              #Column height
+                  VerticalSpacing     #Auto
+                  Enabled             #Yes
+                  Skip                #No
+                  AlignControl        #Yes
+                  HelpText            #
+                  FeatureKey          #
+                  DragDrop            #None
+                  LookupButton        #Auto
+                  ReplaceOnLookup     #Yes
+                  SearchAfterInput    #Auto
+                  LimitText           #Auto
+                  DisplayLength       #Auto
+                  DisplayHeight       #Auto
+                  Border              #3D
+                  Text                #
+                  PasswordStyle       #No
+                  Alignment           #Auto
+                  ChangeCase          #Auto
+                  MultiLine           #Yes
+                  ColorScheme         #Default
+                  BackStyle           #Opaque
+                  BackgroundColor     #Window background
+                  ForegroundColor     #Window text
+                  Font                #
+                  FontSize            #0
+                  Italic              #No
+                  Underline           #No
+                  Bold                #Default
+                  CharacterSet        #0
+                  LabelForegroundColor #Window text
+                  ShowLabel           #Yes
+                  Label               #
+                  LabelFont           #
+                  LabelFontSize       #0
+                  LabelItalic         #No
+                  LabelUnderline      #No
+                  LabelBold           #Default
+                  LabelCharacterSet   #0
+                  LabelWidth          #Auto
+                  LabelHeight         #Auto
+                  LabelPosition       #Left
+                  LabelAlignment      #Right
+                  DataSource          #ErrorRep_Table
+                  DataField           #Description
+                  ArrayIndex          #0
+                ENDPROPERTIES
+                
+              ENDCONTROL 
+              
+            ENDCONTAINER
+            
+          ENDCONTROL 
+          
+          CONTROL TABPAGE
+            PROPERTIES
+              Name                #Specifikcation
+              AutoDeclaration     #No
+              Visible             #Yes
+              AllowEdit           #Yes
+              Left                #Auto (left)
+              Top                 #Auto
+              Width               #Auto
+              Height              #Auto
+              VerticalSpacing     #Auto
+              Enabled             #Yes
+              Skip                #No
+              AlignControl        #No
+              HelpText            #
+              FeatureKey          #
+              DragDrop            #None
+              ColorScheme         #Default
+              BackgroundColor     #Button face (3D)
+              BackStyle           #Opaque
+              Caption             #Specifikation
+              DataSource          #
+              TopMargin           #Auto
+              BottomMargin        #Auto
+              LeftMargin          #Auto
+              RightMargin         #Auto
+              ArrangeWhen         #Default
+              ArrangeMethod       #Vertical
+              Columns             #2
+              Columnspace         #Auto
+              ArrangeGuide        
+                ARRAY INDEX Columns 
+                  #0
+                  #0
+                ENDARRAY
+              HideIfEmpty         #Yes
+              AlignChildren       #Yes
+              AlignChild          #Yes
+              TabAutoChange       #No
+            ENDPROPERTIES
+            
+            CONTAINER
+              CONTROL GROUP
+                PROPERTIES
+                  Name                #Description
+                  AutoDeclaration     #No
+                  Visible             #Yes
+                  AllowEdit           #Yes
+                  Left                #Auto (left)
+                  Top                 #Auto
+                  Width               #Auto
+                  Height              #Auto
+                  VerticalSpacing     #Auto
+                  Enabled             #Yes
+                  Skip                #No
+                  AlignControl        #No
+                  HelpText            #
+                  FeatureKey          #
+                  DragDrop            #None
+                  FrameType           #Auto
+                  FramePosition       #Outside
+                  Caption             #
+                  ColorScheme         #Default
+                  BackStyle           #Opaque
+                  BackgroundColor     #Button face (3D)
+                  Font                #
+                  FontSize            #0
+                  Italic              #No
+                  Underline           #No
+                  Bold                #Default
+                  CharacterSet        #0
+                  LabelFont           #
+                  LabelFontSize       #0
+                  LabelItalic         #No
+                  LabelUnderline      #No
+                  LabelBold           #Default
+                  LabelCharacterSet   #0
+                  DataSource          #ErrorRep_Table
+                  TopMargin           #Auto
+                  BottomMargin        #Auto
+                  LeftMargin          #Auto
+                  RightMargin         #Auto
+                  ArrangeWhen         #Default
+                  ArrangeMethod       #Vertical
+                  Columns             #1
+                  Columnspace         #Auto
+                  ArrangeGuide        
+                    ARRAY INDEX Columns 
+                      #0
+                    ENDARRAY
+                  HideIfEmpty         #Yes
+                  AlignChildren       #Yes
+                  AlignChild          #Yes
+                  DataGroup           #Description
+                  AutoDataGroup       #Yes
+                ENDPROPERTIES
+                
+                  CONTAINER
+                  ENDCONTAINER
+                  
+              ENDCONTROL 
+              
+              CONTROL GROUP
+                PROPERTIES
+                  Name                #Identification
+                  AutoDeclaration     #No
+                  Visible             #Yes
+                  AllowEdit           #Yes
+                  Left                #Auto (left)
+                  Top                 #Auto
+                  Width               #Auto
+                  Height              #Auto
+                  VerticalSpacing     #Auto
+                  Enabled             #Yes
+                  Skip                #No
+                  AlignControl        #No
+                  HelpText            #
+                  FeatureKey          #
+                  DragDrop            #None
+                  FrameType           #Auto
+                  FramePosition       #Outside
+                  Caption             #
+                  ColorScheme         #Default
+                  BackStyle           #Opaque
+                  BackgroundColor     #Button face (3D)
+                  Font                #
+                  FontSize            #0
+                  Italic              #No
+                  Underline           #No
+                  Bold                #Default
+                  CharacterSet        #0
+                  LabelFont           #
+                  LabelFontSize       #0
+                  LabelItalic         #No
+                  LabelUnderline      #No
+                  LabelBold           #Default
+                  LabelCharacterSet   #0
+                  DataSource          #ErrorRep_Table
+                  TopMargin           #Auto
+                  BottomMargin        #Auto
+                  LeftMargin          #Auto
+                  RightMargin         #Auto
+                  ArrangeWhen         #Default
+                  ArrangeMethod       #Vertical
+                  Columns             #1
+                  Columnspace         #Auto
+                  ArrangeGuide        
+                    ARRAY INDEX Columns 
+                      #0
+                    ENDARRAY
+                  HideIfEmpty         #Yes
+                  AlignChildren       #Yes
+                  AlignChild          #Yes
+                  DataGroup           #Identification
+                  AutoDataGroup       #Yes
+                ENDPROPERTIES
+                
+                  CONTAINER
+                  ENDCONTAINER
+                  
+              ENDCONTROL 
+              
+              CONTROL GROUP
+                PROPERTIES
+                  Name                #Status
+                  AutoDeclaration     #No
+                  Visible             #Yes
+                  AllowEdit           #Yes
+                  Left                #Auto (left)
+                  Top                 #Auto
+                  Width               #Auto
+                  Height              #Auto
+                  VerticalSpacing     #Auto
+                  Enabled             #Yes
+                  Skip                #No
+                  AlignControl        #No
+                  HelpText            #
+                  FeatureKey          #
+                  DragDrop            #None
+                  FrameType           #Auto
+                  FramePosition       #Outside
+                  Caption             #
+                  ColorScheme         #Default
+                  BackStyle           #Opaque
+                  BackgroundColor     #Button face (3D)
+                  Font                #
+                  FontSize            #0
+                  Italic              #No
+                  Underline           #No
+                  Bold                #Default
+                  CharacterSet        #0
+                  LabelFont           #
+                  LabelFontSize       #0
+                  LabelItalic         #No
+                  LabelUnderline      #No
+                  LabelBold           #Default
+                  LabelCharacterSet   #0
+                  DataSource          #ErrorRep_Table
+                  TopMargin           #Auto
+                  BottomMargin        #Auto
+                  LeftMargin          #Auto
+                  RightMargin         #Auto
+                  ArrangeWhen         #Default
+                  ArrangeMethod       #Vertical
+                  Columns             #1
+                  Columnspace         #Auto
+                  ArrangeGuide        
+                    ARRAY INDEX Columns 
+                      #0
+                    ENDARRAY
+                  HideIfEmpty         #Yes
+                  AlignChildren       #Yes
+                  AlignChild          #Yes
+                  DataGroup           #Status
+                  AutoDataGroup       #Yes
+                ENDPROPERTIES
+                
+                  CONTAINER
+                  ENDCONTAINER
+                  
+              ENDCONTROL 
+              
+            ENDCONTAINER
+            
+          ENDCONTROL 
+          
+        ENDCONTAINER
+        
+      ENDCONTROL 
+      
+    ENDCONTAINER
+    
+  ENDDESIGN
+  
+ENDFORM
+
+
+***Element: FRM
+
+; Axapta Forms unloaded at Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+FRMVERSION 4
+
+FORM #ErrType
+  PROPERTIES
+    Name                #ErrType
+  ENDPROPERTIES
+  
+  METHODS
+    Version: 3
+    SOURCE #classDeclaration
+      #class FormRun extends ObjectRun
+      #{
+      #
+      #}
+    ENDSOURCE
+  ENDMETHODS
+  OBJECTBANK
+    DATASOURCE
+      OBJECTPOOL
+        PROPERTIES
+          Name                #ErrTypeTable
+          Table               #ErrTypeTable
+          Index               #
+          Company             #
+          CounterField        #
+          AllowCheck          #Yes
+          AllowEdit           #Yes
+          AllowCreate         #Yes
+          AllowDelete         #Yes
+          StartPosition       #First
+          AutoSearch          #Yes
+          AutoNotify          #Yes
+          AutoQuery           #Yes
+          OnlyFetchActive     #No
+          JoinSource          #
+          LinkType            #Delayed
+          DelayActive         #Yes
+          InsertAtEnd         #Yes
+          InsertIfEmpty       #Yes
+        ENDPROPERTIES
+        
+        FIELDLIST
+        ENDFIELDLIST
+      ENDOBJECTPOOL
+    ENDDATASOURCE
+  ENDOBJECTBANK
+  
+  JOINS
+  ENDJOINS
+  
+  DESIGN
+    PROPERTIES
+      Left                #Auto (left)
+      Top                 #Auto
+      Width               #Column width
+      Height              #Column height
+      Visible             #Yes
+      Caption             #Typer
+      TitleDatasource     #
+      Frame               #Standard
+      WindowResize        #Auto
+      WindowType          #Standard
+      SaveSize            #No
+      AlwaysOnTop         #No
+      HideToolbar         #No
+      setCompany          #Yes
+      ColorScheme         #Default
+      CssClass            #
+      ShowWebHelp         #Default
+      BackgroundColor     #Button face (3D)
+      ImageName           #
+      ImageResource       #0
+      Imagemode           #Normal (preserve pict. attributes)
+      Mode                #Watch
+      SupportReload       #No
+      Font                #
+      FontSize            #0
+      Italic              #No
+      Underline           #No
+      Bold                #Default
+      CharacterSet        #0
+      LabelFont           #
+      LabelFontSize       #0
+      LabelItalic         #No
+      LabelUnderline      #No
+      LabelBold           #Default
+      LabelCharacterSet   #0
+      DataSource          #
+      TopMargin           #Auto
+      BottomMargin        #Auto
+      LeftMargin          #Auto
+      RightMargin         #Auto
+      ArrangeWhen         #Default
+      ArrangeMethod       #Vertical
+      Columns             #2
+      Columnspace         #Auto
+      ArrangeGuide        
+        ARRAY INDEX Columns 
+          #0
+          #0
+        ENDARRAY
+      HideIfEmpty         #Yes
+      AlignChildren       #Yes
+      AlignChild          #Yes
+    ENDPROPERTIES
+    
+    CONTAINER
+      CONTROL GRID
+        PROPERTIES
+          Name                #Grid
+          AutoDeclaration     #No
+          Visible             #Yes
+          AllowEdit           #Yes
+          Left                #Auto (left)
+          Top                 #Auto
+          Width               #Column width
+          Height              #Column height
+          VerticalSpacing     #Auto
+          Enabled             #Yes
+          Skip                #No
+          AlignControl        #No
+          HelpText            #
+          FeatureKey          #
+          DragDrop            #None
+          ColorScheme         #Default
+          BackgroundColor     #Window background
+          TopMargin           #0
+          BottomMargin        #0
+          LeftMargin          #0
+          RightMargin         #0
+          MultiSelect         #Yes
+          VisibleCols         #Auto
+          VisibleRows         #Auto
+          ShowColLabels       #Yes
+          ShowRowLabels       #Yes
+          HighlightActive     #Yes
+          ActiveBackColor     #Highlight background
+          ActiveForeColor     #Highlight text
+          DataSource          #ErrTypeTable
+        ENDPROPERTIES
+        
+          CONTAINER
+            CONTROL STRINGEDIT
+              PROPERTIES
+                Name                #ErrTypeTable_ErrType
+                AutoDeclaration     #No
+                Visible             #Yes
+                AllowEdit           #Yes
+                Left                #Auto (left)
+                Top                 #Auto
+                Width               #Auto
+                Height              #Auto
+                VerticalSpacing     #Auto
+                Enabled             #Yes
+                Skip                #No
+                AlignControl        #Yes
+                HelpText            #
+                FeatureKey          #
+                DragDrop            #None
+                LookupButton        #Auto
+                ReplaceOnLookup     #Yes
+                SearchAfterInput    #Auto
+                LimitText           #Auto
+                DisplayLength       #Auto
+                DisplayHeight       #Auto
+                Border              #None
+                Text                #
+                PasswordStyle       #No
+                Alignment           #Auto
+                ChangeCase          #Auto
+                MultiLine           #No
+                ColorScheme         #Default
+                BackStyle           #Opaque
+                BackgroundColor     #Window background
+                ForegroundColor     #Window text
+                Font                #
+                FontSize            #0
+                Italic              #No
+                Underline           #No
+                Bold                #Default
+                CharacterSet        #0
+                LabelForegroundColor #Window text
+                ShowLabel           #Yes
+                Label               #
+                LabelFont           #
+                LabelFontSize       #0
+                LabelItalic         #No
+                LabelUnderline      #No
+                LabelBold           #Default
+                LabelCharacterSet   #0
+                LabelWidth          #Auto
+                LabelHeight         #Auto
+                LabelPosition       #Left
+                LabelAlignment      #Right
+                DataSource          #ErrTypeTable
+                DataField           #ErrType
+                ArrayIndex          #0
+              ENDPROPERTIES
+              
+            ENDCONTROL 
+            
+          ENDCONTAINER
+          
+      ENDCONTROL 
+      
+    ENDCONTAINER
+    
+  ENDDESIGN
+  
+ENDFORM
+
+
+***Element: DBE
+
+; Axapta Enumtype : ErrStatus unloaded at Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+  ENUMTYPEVERSION 1
+  
+  ENUMTYPE #ErrStatus
+    PROPERTIES
+      Name                #ErrStatus
+      Label               #
+      Help                #
+      DisplayLength       #Auto
+      Style               #Combo box
+      FeatureKey          #
+    ENDPROPERTIES
+    
+    TYPEELEMENTS
+      #Reportet
+      PROPERTIES
+        Name                #Reportet
+        Label               #Rapporteret
+      ENDPROPERTIES
+      
+      #Approved
+      PROPERTIES
+        Name                #Approved
+        Label               #Godkendt
+      ENDPROPERTIES
+      
+      #OnHold
+      PROPERTIES
+        Name                #OnHold
+        Label               #På hold
+      ENDPROPERTIES
+      
+      #Ended
+      PROPERTIES
+        Name                #Ended
+        Label               #Afsluttet
+      ENDPROPERTIES
+      
+      #Rejected
+      PROPERTIES
+        Name                #Rejected
+        Label               #Afvist
+      ENDPROPERTIES
+      
+    ENDTYPEELEMENTS
+  ENDENUMTYPE
+  
+
+***Element: UTS
+
+; Axapta String: ErrType udlæst ved Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+  USERTYPEVERSION 6
+  
+  USERTYPE #ErrType
+  STRING
+    PROPERTIES
+      Name                #ErrType
+      Label               #Fejltype
+      HelpText            #
+      FormHelp            #
+      ArrayLength         #1
+      DisplayLength       #Auto
+      FeatureKey          #
+      ButtonImage         #Arrow
+      Extends             #
+      DisplayHeight       #Auto
+      StringSize          #10
+      Adjustment          #Left
+      Alignment           #Auto
+      ChangeCase          #Auto
+    ENDPROPERTIES
+    
+    TYPEELEMENTS
+    ENDTYPEELEMENTS
+    
+    TYPEREFERENCES
+      TYPEREFERENCETYPE DATASET
+      PROPERTIES
+        Table               #ErrTypeTable
+        RelatedField        #ErrType
+      ENDPROPERTIES
+      
+    ENDTYPEREFERENCES
+    
+  ENDUSERTYPE
+  
+
+***Element: UTI
+
+; Axapta Integer: ErrPriority udlæst ved Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+  USERTYPEVERSION 6
+  
+  USERTYPE #ErrPriority
+  INT
+    PROPERTIES
+      Name                #ErrPriority
+      Label               #Prioritet
+      HelpText            #1 = høj prioritet, 9 = lav prioritet       0=ingen prioritet eller også er det ikke taget stilling endnu
+      FormHelp            #
+      ArrayLength         #1
+      DisplayLength       #Auto
+      FeatureKey          #
+      ButtonImage         #Arrow
+      Extends             #
+      Alignment           #Auto
+      SignDisplay         #Auto
+      RotateSign          #Auto
+      ShowZero            #Auto
+      DisplaceNegative    #Auto
+      AllowNegative       #Auto
+    ENDPROPERTIES
+    
+    TYPEELEMENTS
+    ENDTYPEELEMENTS
+    
+    TYPEREFERENCES
+    ENDTYPEREFERENCES
+    
+  ENDUSERTYPE
+  
+
+***Element: UTI
+
+; Axapta Integer: ErrNumber udlæst ved Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+  USERTYPEVERSION 6
+  
+  USERTYPE #ErrNumber
+  INT
+    PROPERTIES
+      Name                #ErrNumber
+      Label               #Fejlnummer
+      HelpText            #
+      FormHelp            #
+      ArrayLength         #1
+      DisplayLength       #Auto
+      FeatureKey          #
+      ButtonImage         #Arrow
+      Extends             #
+      Alignment           #Auto
+      SignDisplay         #Auto
+      RotateSign          #Auto
+      ShowZero            #Auto
+      DisplaceNegative    #Auto
+      AllowNegative       #Auto
+    ENDPROPERTIES
+    
+    TYPEELEMENTS
+    ENDTYPEELEMENTS
+    
+    TYPEREFERENCES
+    ENDTYPEREFERENCES
+    
+  ENDUSERTYPE
+  
+
+***Element: DBT
+
+; Axapta Table : ErrorRep_Table unloaded at Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+  TABLEVERSION 1
+  
+  TABLE #ErrorRep_Table
+    PROPERTIES
+      Name                #ErrorRep_Table
+      Label               #
+      FormRef             #
+      TitleField1         #
+      TitleField2         #
+      Temporary           #No
+      FeatureKey          #
+      MaxAccessMode       #Delete
+      CacheLookup         #None
+      CreateRecIdIndex    #No
+      SaveDataPerCompany  #Yes
+      TableGroup          #Miscellaneous
+      PrimaryIndex        #
+      ClusterIndex        #
+      ModifiedDate        #No
+      ModifiedTime        #No
+      ModifiedBy          #No
+      ModifiedTransactionId #No
+      CreatedDate         #No
+      CreatedTime         #No
+      CreatedBy           #No
+      CreatedTransactionId #No
+    ENDPROPERTIES
+    
+    FIELDS
+      FIELD #ErrNumber
+        INT
+        PROPERTIES
+          Type                #Heltal
+          Name                #ErrNumber
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrorRep_Table
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #ErrNumber
+              #
+            ENDARRAY
+          FieldUpdate         #Absolute
+        ENDPROPERTIES
+        
+      FIELD #ErrType
+        STRING
+        PROPERTIES
+          Type                #Streng
+          Name                #ErrType
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrorRep_Table
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #ErrType
+              #
+            ENDARRAY
+          StringSize          #10
+          Adjustment          #Left
+        ENDPROPERTIES
+        
+      FIELD #ErrPriority
+        INT
+        PROPERTIES
+          Type                #Heltal
+          Name                #ErrPriority
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrorRep_Table
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #ErrPriority
+              #
+            ENDARRAY
+          FieldUpdate         #Absolute
+        ENDPROPERTIES
+        
+      FIELD #EmplId
+        STRING
+        PROPERTIES
+          Type                #Streng
+          Name                #EmplId
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrorRep_Table
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #EmplId
+              #
+            ENDARRAY
+          StringSize          #10
+          Adjustment          #Left
+        ENDPROPERTIES
+        
+      FIELD #ErrStatus
+        ENUM
+        PROPERTIES
+          Type                #Fastteksttype
+          Name                #ErrStatus
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrorRep_Table
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #
+              #
+            ENDARRAY
+          EnumType            #ErrStatus
+        ENDPROPERTIES
+        
+      FIELD #EndDate
+        DATE
+        PROPERTIES
+          Type                #Dato
+          Name                #EndDate
+          Label               #Afslut dato
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrorRep_Table
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #
+              #
+            ENDARRAY
+        ENDPROPERTIES
+        
+      FIELD #TransDate
+        DATE
+        PROPERTIES
+          Type                #Dato
+          Name                #TransDate
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrorRep_Table
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #TransDate
+              #
+            ENDARRAY
+        ENDPROPERTIES
+        
+      FIELD #ErrHeader
+        STRING
+        PROPERTIES
+          Type                #Streng
+          Name                #ErrHeader
+          Label               #Overskrift
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrorRep_Table
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #
+              #
+            ENDARRAY
+          StringSize          #50
+          Adjustment          #Left
+        ENDPROPERTIES
+        
+      FIELD #Description
+        STRING
+        PROPERTIES
+          Type                #Streng
+          Name                #Description
+          Label               #
+          HelpText            #
+          GroupPrompt         #
+          SaveContents        #Yes
+          Mandatory           #No
+          AllowEditOnCreate   #Yes
+          AllowEdit           #Yes
+          Visible             #Yes
+          FeatureKey          #
+          Table               #ErrorRep_Table
+          AliasFor            #
+          ExtendedDataType    
+            ARRAY 
+              #Notes
+              #
+            ENDARRAY
+          StringSize          #(Memo)
+          Adjustment          #Left
+        ENDPROPERTIES
+        
+    ENDFIELDS
+    GROUPS
+      GROUP #AutoReport
+        GROUPFIELDS
+        ENDGROUPFIELDS
+      ENDGROUP
+      GROUP #Description
+        GROUPFIELDS
+          #ErrHeader
+          #Description
+        ENDGROUPFIELDS
+      ENDGROUP
+      GROUP #Identification
+        GROUPFIELDS
+          #ErrNumber
+          #ErrHeader
+          #ErrType
+        ENDGROUPFIELDS
+      ENDGROUP
+      GROUP #Status
+        GROUPFIELDS
+          #ErrNumber
+          #ErrPriority
+          #EmplId
+          #ErrStatus
+          #EndDate
+          #TransDate
+          #ErrHeader
+        ENDGROUPFIELDS
+      ENDGROUP
+    ENDGROUPS
+    
+    INDICES
+    ENDINDICES
+    REFERENCES
+    ENDREFERENCES
+    
+    DELETEACTIONS
+    ENDDELETEACTIONS
+    
+    METHODS
+      Version: 3
+      SOURCE #initValue
+        #void initValue()
+        #{
+        #    ErrorRep_Table  _ErrorRep_Table;
+        #    ;
+        #    super();
+        #    select reverse firstonly _ErrorRep_Table order by ErrNumber;
+        #    this.ErrNumber = _ErrorRep_Table.ErrNumber + 1;
+        #    this.TransDate = systemdateget();
+        #    this.EmplId = EmplTable::Userid2EmplId(curuserid());
+        #
+        #}
+      ENDSOURCE
+      SOURCE #insert
+        #void insert()
+        #{
+        #    ErrorRep_Table  _ErrorRep_Table;
+        #    ;
+        #    select reverse firstonly _ErrorRep_Table order by ErrNumber;
+        #    if (this.ErrNumber != _ErrorRep_Table.ErrNumber + 1)
+        #    {
+        #        info(StrFmt('Nummer er ændret fra %1 til %2',
+        #                this.ErrNumber,_ErrorRep_Table.ErrNumber + 1));
+        #        this.ErrNumber = _ErrorRep_Table.ErrNumber + 1;
+        #
+        #    }
+        #    super();
+        #
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDTABLE
+  
+
+***Element: PRN
+
+; Axapta Project : Fejlrapportering unloaded at Onsdag 18-08-2004
+; --------------------------------------------------------------------------------
+  PROJECTVERSION 1
+  
+  PROJECT #Fejlrapportering
+   PRIVATE
+    SOURCE #Fejlrapportering
+      #Formatversion: 1 
+      #'Fejlrapportering' 155,267,674,847 
+      #FTM 1'ErrTable' 
+      #{ 
+      #} 
+      #DBT'ErrTypeTable' 
+      #{ 
+      #} 
+      #FRM'ErrTable'  Active 
+      #{ 
+      #    'Data Sources' 
+      #    { 
+      #        'ErrorRep_Table' 
+      #        { 
+      #        } 
+      #    } 
+      #    'Designs' 
+      #    { 
+      #        'Design' 
+      #        { 
+      #            '[Tab:Tab]' 
+      #            { 
+      #                '[TabPage:Overview]' 
+      #                { 
+      #                    '[Grid:Grid]' 
+      #                    { 
+      #                    } 
+      #                    'StringEdit:ErrorRep_Table_Description' 
+      #                    { 
+      #                    } 
+      #                } 
+      #            } 
+      #        } 
+      #    } 
+      #} 
+      #FRM'ErrType' 
+      #{ 
+      #} 
+      #DBE'ErrStatus' 
+      #{ 
+      #} 
+      #UTS'ErrType'  Active 
+      #{ 
+      #    'Relations' 
+      #    { 
+      #    } 
+      #} 
+      #UTI'ErrPriority' 
+      #{ 
+      #} 
+      #UTI'ErrNumber' 
+      #{ 
+      #} 
+      #DBT'ErrorRep_Table'  Active 
+      #{ 
+      #    'Fields' 
+      #    { 
+      #    } 
+      #    'Methods' 
+      #    { 
+      #    } 
+      #} 
+      #
+    ENDSOURCE
+  ENDPROJECT
+  
+
+***Element: END

@@ -1,0 +1,11 @@
+select top 1 [RETAILTRANSACTIONTABLE].transdate,* from  [dbo].[RETAILTRANSACTIONTABLE] order by [RETAILTRANSACTIONTABLE].RECID desc
+select top 100 [enable], * from USERINFO where (id like 'alfap%' or id = 'mssupport' or id = 'okko') and ENABLE = 0
+select RootURL,DATAAREAID,* from CollabSiteParameters where dataareaid = 'dat'
+SELECT [SERVERID],[SERVERURL],[AXAPTAREPORTFOLDER],[REPORTMANAGERURL],[SERVERINSTANCE],[AOSID],[CONFIGURATIONID]  FROM [SRSSERVERS]
+
+
+SELECT TOP 1000
+      [UserName]
+      ,[RoleType]
+  FROM [SUPPORT_ManagementReporter].[Reporting].[SecurityUser]
+  where roletype = 5

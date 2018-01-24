@@ -1,0 +1,15 @@
+--Find all sysadmins
+select SUR.USER_, SR.AOTNAME, UI.NAME, UI.[ENABLE] from [SUPPORT2_AX2012].dbo.[SECURITYUSERROLE] as SUR
+join [SUPPORT2_AX2012_model].dbo.SECURITYROLE as SR on
+	SUR.SECURITYROLE = SR.RECID
+join [SUPPORT2_AX2012].dbo.USERINFO as UI on
+	UI.ID = SUR.USER_
+where SR.AOTNAME = '-SYSADMIN-'
+and   UI.[ENABLE]=1
+
+
+--Find users per group
+select count(*) as cnt, SR.AOTNAME from [SUPPORT2_AX2012].dbo.[SECURITYUSERROLE] as SUR
+join [SUPPORT2_AX2012_model].dbo.SECURITYROLE as SR on
+	SUR.SECURITYROLE = SR.RECID
+group by SR.AOTNAME

@@ -1,0 +1,11 @@
+select * from (
+select TAXPERIOD, count(*) cnt, datepart(MONTH, transdate) themonth from taxtrans 
+	where dataareaid = 'NO01' 
+	and   transdate>='20160101' 
+	and   transdate<='20161231' 
+	group by taxperiod, datepart(MONTH, transdate)
+	) as s
+
+	pivot (     sum(cnt)
+            for themonth in ([1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12])
+)  Month

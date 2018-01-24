@@ -1,0 +1,39 @@
+USE [master]
+--BACKUP LOG [ABAXProd] TO  DISK = N'E:\MSSQL\BACKUP\ABAXProd_LogBackup_2017-06-22_14-33-49.bak' WITH NOFORMAT, NOINIT,  NAME = N'ABAXProd_LogBackup_2017-06-22_14-33-49', NOSKIP, NOREWIND, NOUNLOAD,  NORECOVERY ,  STATS = 5
+
+RESTORE DATABASE [ABAXUAT] FROM  DISK = N'E:\MSSQL\BACKUP\ABAXProd_backup_2017_06_22_030001_2408958.bak' 
+	WITH  FILE = 1,  
+	MOVE N'MicrosoftDynamicsAx' TO N'E:\MSSQL\DATA\ABAXUAT.mdf',  
+	MOVE N'MicrosoftDynamicsAx_log' TO N'F:\Log\ABAXUAT_log.ldf',  
+	NOUNLOAD,  STATS = 5
+GO
+ALTER DATABASE [AxProdTest_model]
+              modify file(NAME='MicrosoftDynamicsAx',NEWNAME='ABAXUAT')
+ALTER DATABASE [AxProdTest_model]
+              modify file(NAME='MicrosoftDynamicsAx_log',NEWNAME=
+'ABAXUAT_log')
+
+--use ABAXUAT
+--update BATCHJOB set [STATUS] = 0, CAPTION = '<AutoWithhold> '+CAPTION where [STATUS] = 0
+--DELETE FROM SYSSERVERSESSIONS
+--DELETE FROM SYSCLIENTSESSIONS
+--DELETE FROM SYSSERVERCONFIG
+--DELETE FROM SYSUSERLOG
+--update APLRetailGoDreamParameters set ServiceURL = ''
+--update APLRetailSmartBoxParameters set ServiceURL = ''
+--update APLRetailBellevueParameters set ServiceURL = ''
+--update APLRetailGiftcardBalanceParameters set GiftCardBalanceURL = ''
+--update RetailConnParameters set HQMsgDBServerName  = ''
+--update RetailTransactionServiceProfile set centralTableServer = '' 
+--update RetailTransactionServiceProfile set ServerCertificateDNS = ''
+--update RetailCDXFileStorageProvider set ShareDownloadPath = ''
+--update RetailCDXFileStorageProvider set ShareUploadPath = ''
+--update RetailConnDatabaseProfile set Name = ''
+--update RetailChannelProfileProperty set Value = ''
+--update SRSServers set ServerId = ''
+--update SRSServers set ReportManagerUrl = ''
+--update SRSServers set ServerUrl = ''
+--update SRSServers set AOSId = ''
+
+dbss20170628_1345
+dbss20170629_1030

@@ -1,0 +1,71 @@
+(@P1 datetime)SELECT
+	tt.[TYPE]
+	,tt.[STORE]
+	,tt.[TERMINAL]
+	,tt.[STAFF]
+	,tt.[STATEMENTCODE]
+	,tt.[RECEIPTID]
+	,tt.[TRANSDATE]
+	,tt.[TRANSTIME]
+	,tt.[TIMEWHENTRANSCLOSED]
+	,tt.[ENTRYSTATUS]
+	,tt.[MODIFIEDDATETIME]
+	,tt.[DATAAREAID]
+	,tt.[RECID]
+,tt.[CUSTACCOUNT]
+,tt.[TRANSACTIONID] 
+FROM
+	[dbo].[RETAILTRANSACTIONTABLE] as tt
+WHERE
+	-- Only Sales Postings:
+	tt.[TYPE]=2
+	AND tt.[TRANSDATE ]>=@P1 
+ORDER BY
+	tt.[MODIFIEDDATETIME]
+
+
+/*
+Explanation [ENTRYSTATUS]:
+https://msdn.microsoft.com/en-us/library/retailentrystatus.aspx
+None 0 None 
+Voided 1 Voided 
+Posted 2 Posted 
+Concluded 3 Concluded 
+Cancelled 4 Cancelled 
+OnHold 5 On Hold 
+Training 6 Concluded
+
+Explanation [TYPE]:
+https://msdn.microsoft.com/en-us/library/retailtransactiontype.aspx
+Logoff 0 Logoff 
+Logon 1 Logon 
+Sales 2 Sales 
+Payment 3 Payment 
+RemoveTender 4 Remove tender 
+FloatEntry 5 Float entry 
+ChangeTender 6 Change tender 
+TenderDeclaration 7 Tender declaration 
+Voided 8 Voided 
+OpenDrawer 9 Open drawer 
+NegativeAdjustment 10 Negative adjustment 
+PhysicalInventory 11 Physical inventory 
+EndOfDay 12 End of day 
+EndOfShift 13 End of shift 
+SalesOrder 14 Sales order 
+SalesInvoice 15 Customer invoice 
+BankDrop 16 Bank drop 
+SafeDrop 17 Safe drop 
+IncomeExpense 18 Income expense 
+CustomerOrder 19 Customer order 
+StartingAmount 20 Starting amount 
+SuspendShift 21 Suspend shift 
+BlindCloseShift 22 Blind close shift 
+CloseShift 23 Close shift 
+PrintX 24 Print X report 
+PrintZ 25 Print Z report 
+PendingSalesOrder 27 Pending Sales Order 
+ManagerAuthorize 26 Manager authorization 
+KitDisassembly 28 Kit disassembly 
+ResetPassword 29 Reset password 
+ChangePassword 30 Change password 
+*/

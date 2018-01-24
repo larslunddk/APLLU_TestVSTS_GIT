@@ -1,0 +1,8 @@
+select top 10000 NUMBERSEQUENCE,[format],substring([Format],CHARINDEX('#',[format]),999) as mask,
+		LEN( substring([Format],CHARINDEX('#',[format]),999)) as MaskLength,
+		len(convert(nvarchar,HIGHEST)) as HighestNumber_Length
+		,highest
+		,NEXTREC
+		--,HIGHEST		
+		 FROM NUMBERSEQUENCETABLE
+where LEN( substring([Format],CHARINDEX('#',[format]),999)) <> len(convert(nvarchar,HIGHEST))

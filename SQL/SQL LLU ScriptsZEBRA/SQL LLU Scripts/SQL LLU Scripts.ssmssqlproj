@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+<SqlWorkbenchSqlProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="SQL LLU Scripts">
+  <Items>
+    <LogicalFolder Name="Connections" Type="2" Sorted="true">
+      <Items>
+        <ConnectionNode Name="AG01AX:ZEBRA\alfapllu">
+          <Created>2017-06-20T09:57:28.4182868+02:00</Created>
+          <Type>SQL</Type>
+          <Server>AG01AX</Server>
+          <UserName />
+          <Authentication>Windows Authentication</Authentication>
+          <InitialDB />
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+        <ConnectionNode Name="AXUATSQL001:ZEBRA\alfapllu">
+          <Created>2017-08-16T15:36:30.5726729+02:00</Created>
+          <Type>SQL</Type>
+          <Server>AXUATSQL001</Server>
+          <UserName />
+          <Authentication>Windows Authentication</Authentication>
+          <InitialDB>UAT_AX2012</InitialDB>
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+        <ConnectionNode Name="CPH-SQL02T:ZEBRA\alfapllu">
+          <Created>2017-08-14T09:45:37.8391851+02:00</Created>
+          <Type>SQL</Type>
+          <Server>CPH-SQL02T</Server>
+          <UserName />
+          <Authentication>Windows Authentication</Authentication>
+          <InitialDB>master</InitialDB>
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+        <ConnectionNode Name="CPH-SQL04T:ZEBRA\alfapllu">
+          <Created>2017-06-20T09:53:30.5740308+02:00</Created>
+          <Type>SQL</Type>
+          <Server>CPH-SQL04T</Server>
+          <UserName />
+          <Authentication>Windows Authentication</Authentication>
+          <InitialDB>SUPPORT_AX2012</InitialDB>
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+        <ConnectionNode Name="CPH-SQL05t:ZEBRA\alfapllu">
+          <Created>2017-08-20T11:45:04.6918618+02:00</Created>
+          <Type>SQL</Type>
+          <Server>CPH-SQL05t</Server>
+          <UserName />
+          <Authentication>Windows Authentication</Authentication>
+          <InitialDB />
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Queries" Type="0" Sorted="true">
+      <Items>
+        <FileNode Name="BatchJob change user.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:AG01AX:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>AG01AX</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>BatchJob change user.sql</FullPath>
+        </FileNode>
+        <FileNode Name="BatchJob monitoring.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>BatchJob monitoring.sql</FullPath>
+        </FileNode>
+        <FileNode Name="BATCHJob_Rename.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>BATCHJob_Rename.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_AX_Security_Priviledges.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_AX_Security_Priviledges.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_CopyDataBetweenDatabases.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL02T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL02T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_CopyDataBetweenDatabases.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_DatabaseLogStats.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:AG01AX:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>AG01AX</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_DatabaseLogStats.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_DBSize.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_DBSize.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_DiskSpace_PerDatabase.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_DiskSpace_PerDatabase.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_Index_Defrag.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:AXUATSQL001:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>AXUATSQL001</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_Index_Defrag.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_Index_Defrag2.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:AXUATSQL001:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>AXUATSQL001</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_Index_Defrag2.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_Indexes_Statistics.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_Indexes_Statistics.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_SNAPSHOT_Restore.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_SNAPSHOT_Restore.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_Snippets.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:AG01AX:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>AG01AX</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_Snippets.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_Verify_ChangeBatchUser.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL05t:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL05t</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_Verify_ChangeBatchUser.sql</FullPath>
+        </FileNode>
+        <FileNode Name="LLU_WORK_BatchRemove2.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>LLU_WORK_BatchRemove2.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Show space used per table.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Show space used per table.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Snapshot Restore _ SUPPORT2.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>Snapshot Restore _ SUPPORT2.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SQLQuery1.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:AXUATSQL001:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>AXUATSQL001</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>SQLQuery1.sql</FullPath>
+        </FileNode>
+        <FileNode Name="TEMP_RestoreWorkersToProd.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>TEMP_RestoreWorkersToProd.sql</FullPath>
+        </FileNode>
+        <FileNode Name="TEMP_RestoreWorkersToProd2.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:CPH-SQL04T:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>CPH-SQL04T</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>TEMP_RestoreWorkersToProd2.sql</FullPath>
+        </FileNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Miscellaneous" Type="3" Sorted="true">
+      <Items />
+    </LogicalFolder>
+  </Items>
+</SqlWorkbenchSqlProject>

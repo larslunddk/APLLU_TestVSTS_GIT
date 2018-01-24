@@ -1,0 +1,14 @@
+SELECT *
+INTO [dbo].[BATCHJOBHISTORY_org]
+FROM [dbo].[BATCHJOBHISTORY]
+
+
+drop table [dbo].[BATCHJOBHISTORY]
+
+
+SELECT *
+INTO [dbo].[BATCHJOBHISTORY]
+FROM [dbo].[BATCHJOBHISTORY_org]
+where CREATEDDATETIME >= dateadd(day, -3, GETDATE())
+
+drop table [dbo].[BATCHJOBHISTORY_org] 

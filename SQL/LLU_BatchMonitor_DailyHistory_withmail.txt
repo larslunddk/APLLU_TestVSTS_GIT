@@ -1,0 +1,112 @@
+USE [AX2012_PROD]
+GO
+
+
+Declare @BatchJobList table
+(STARTDATETIME DATETIME, BATCHCAPTION VARCHAR(100), StartDelay INT, Execdelay INT, WarnStartThreshold INT,	WarnExecThreshold INT, ErrStartThreshold INT, ErrExecThreshold INT, INFO VARCHAR(30))
+
+Declare @BatchJobListTemp table
+(STARTDATETIME DATETIME, BATCHCAPTION VARCHAR(100), StartDelay INT, Execdelay INT, WarnStartThreshold INT,	WarnExecThreshold INT, ErrStartThreshold INT, ErrExecThreshold INT, INFO VARCHAR(30), ID INT )
+
+
+Declare @MailDate VARCHAR(50)
+DECLARE @MailRecipients VARCHAR(200)
+DECLARE @MailSubject VARCHAR(100)
+/* DECLARE @MailBody VARCHAR(4000) */
+DECLARE @ID INT
+DECLARE @MAX INT
+DECLARE @STARTDATETIME VARCHAR(120)
+DECLARE @BATCHCAPTION VARCHAR(100)
+DECLARE @StartDelay VARCHAR(5)
+DECLARE @Execdelay VARCHAR(5)
+DECLARE @WarnStartThreshold VARCHAR(5)
+DECLARE	@WarnExecThreshold VARCHAR(5)
+DECLARE @ErrStartThreshold VARCHAR(5)
+DECLARE @ErrExecThreshold VARCHAR(5)
+DECLARE @INFO VARCHAR(30)
+Declare @OutPutHTML NVARCHAR(MAX) 
+
+
+/* Mail Recipients Address */
+SET @MailRecipients = 'llu@alfapeople.com'
+
+
+
+INSERT @BatchJobList
+select top 100  
+       --BATCHJOBHISTORY.ORIGSTARTDATETIME, 
+       BATCHJOBHISTORY.STARTDATETIME, 
+       BATCHJOBHISTORY.CAPTION,
+       datediff(SECOND, BATCHJOBHISTORY.ORIGSTARTDATETIME,BATCHJOBHISTORY.STARTDATETIME)/60 [StartDelay (min)],
+       datediff(SECOND, BATCHJOBHISTORY.STARTDATETIME, BATCHJOBHISTORY.ENDDATETIME)/60 [Exec delay (min)],
+       EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING [Warn Start Threshold],
+       EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING [Warn Exec Threshold],
+       EGBCBATCHJOB.STARTTIMETHRESHOLDERROR [Err Start Threshold],
+       EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR [Err Exec Threshold],
+       case when (datediff(SECOND, BATCHJOBHISTORY.ORIGSTARTDATETIME,BATCHJOBHISTORY.STARTDATETIME)/60>EGBCBATCHJOB.STARTTIMETHRESHOLDERROR) THEN 'ERROR STARTTIME' 
+       else case when (datediff(SECOND, BATCHJOBHISTORY.STARTDATETIME,BATCHJOBHISTORY.ENDDATETIME)/60>EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR) THEN 'ERROR EXECTTIME'
+       else case when (datediff(SECOND, BATCHJOBHISTORY.ORIGSTARTDATETIME,BATCHJOBHISTORY.STARTDATETIME)/60>EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING) THEN 'WARN STARTTIME' 
+       else case when (datediff(SECOND, BATCHJOBHISTORY.STARTDATETIME,BATCHJOBHISTORY.ENDDATETIME)/60>EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING) THEN 'WARN EXECTTIME'
+       else 'n/a'
+       END END END END [INFO]
+from BATCHJOBHISTORY
+join BATCHJOB 
+on BATCHJOB.RECID = BATCHJOBHISTORY.BATCHJOBID
+join EGBCBATCHJOB
+on EGBCBATCHJOB.BATCHJOB = BATCHJOB.RECID
+where BATCHJOBHISTORY.status<>0
+and BATCHJOBHISTORY.ORIGSTARTDATETIME>=dateadd(day,-1,getdate())
+and BATCHJOBHISTORY.ORIGSTARTDATETIME<=getdate()
+and EGBCBATCHJOB.STARTTIMETHRESHOLDERROR<>0
+and EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDERROR<>0
+and (datediff(SECOND, BATCHJOBHISTORY.ORIGSTARTDATETIME,BATCHJOBHISTORY.STARTDATETIME)/60>EGBCBATCHJOB.STARTTIMETHRESHOLDWARNING
+       OR datediff(SECOND, BATCHJOBHISTORY.STARTDATETIME, BATCHJOBHISTORY.ENDDATETIME)/60>EGBCBATCHJOB.EXECUTIONTIMETHRESHOLDWARNING)
+order by STARTDATETIME
+
+
+/* Date and Time */
+Select @MailDate = convert(varchar, getdate(), 120)
+
+/* Mail Subject */
+Select @MailSubject='Dynanmics AX Batch Job Status - Server: '+@@SERVERNAME +' Date: ' +@MailDate
+
+INSERT @BatchJobListTemp
+SELECT STARTDATETIME, BATCHCAPTION, StartDelay, Execdelay, WarnStartThreshold, WarnExecThreshold, ErrStartThreshold, ErrExecThreshold, INFO, ROW_NUMBER() OVER(ORDER BY  COUNT(*) DESC) AS  ID
+FROM @BatchJobList
+GROUP BY STARTDATETIME, BATCHCAPTION, StartDelay, Execdelay, WarnStartThreshold, WarnExecThreshold, ErrStartThreshold, ErrExecThreshold, INFO
+ORDER BY  COUNT(*) DESC
+
+SET @OutPutHTML = '<body><table><tr><table border="1"><td>STARTDATETIME</td><td>CAPTION</td><td>StartDelay (min)</td><td>Exec delay (min)</td><td>Warn Start Threshold</td><td>Warn Exec Threshold</td><td>Err Start Threshold</td><td>Err Exec Threshold</td><td>INFO</td></tr>'
+
+SELECT @MAX = MAX(ID) FROM @BatchJobListTemp
+
+
+SET @ID=1
+WHILE @ID <= @MAX
+ BEGIN
+
+	SELECT @STARTDATETIME = convert(varchar,STARTDATETIME,120) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @BATCHCAPTION = BATCHCAPTION FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @StartDelay = convert(varchar,StartDelay,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @Execdelay = convert(varchar,Execdelay,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @WarnStartThreshold = convert(varchar,WarnStartThreshold,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @WarnExecThreshold = convert(varchar,WarnExecThreshold,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @ErrStartThreshold = convert(varchar,ErrStartThreshold,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @ErrExecThreshold = convert(varchar,ErrExecThreshold,5) FROM @BatchJobListTemp WHERE @ID = ID
+	SELECT @INFO = INFO FROM @BatchJobListTemp WHERE @ID = ID
+ 
+	SET @OutPutHTML = @OutPutHTML + '<tr><td>'+@STARTDATETIME+'<td>'+@BATCHCAPTION+'</td><td>'+@StartDelay+'</td><td>'+@Execdelay+'</td><td>'+@WarnStartThreshold+'</td><td>'+@WarnExecThreshold+'</td><td>'+@ErrStartThreshold+'</td><td>'+@ErrExecThreshold+'</td><td>'+@INFO+'</td></tr>'
+
+	SET	@ID = @ID + 1
+ END
+
+SET @OutPutHTML = @OutPutHTML + '</table></body>'
+
+
+
+
+
+EXEC msdb..sp_send_dbmail @recipients = @MailRecipients,
+@subject = @MailSubject,
+@body = @OutPutHTML,  
+@body_format = 'HTML' ; 

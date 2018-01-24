@@ -1,0 +1,42 @@
+DECLARE 
+@Tab nvarchar(1000),
+@SQL nvarchar(1000)
+DECLARE T_cursor CURSOR FOR SELECT name FROM sysobjects so 
+join sys.change_tracking_tables sc 
+on so.id = sc.object_id WHERE so.type = 'U' 
+
+create table #changetrackingstatus
+(
+      tableName nvarchar(100),
+      Recordcount int
+)
+
+
+SET NOCOUNT ON
+
+OPEN T_cursor
+FETCH NEXT FROM T_cursor INTO @Tab
+WHILE (@@FETCH_STATUS <> -1)
+BEGIN
+Set @SQL = 'INSERT into #changetrackingstatus select  '''+@Tab+''' as tablename, count(*) as recordCountNotSynched
+from changetable (changes '+@Tab+ ',NULL) as c 
+join sys.dm_tran_commit_table tc 
+on c.sys_change_version = tc.commit_ts 
+where tc.commit_time > (SELECT top 1 rs.MODIFIEDDATETIME
+  FROM RETAILCDXDATASYNCROWVERSION rs
+  join RetailConnSchedulerJobTable wcst on rs.JOBID = wcst.JOBID
+  join RetailConnSchedulerJobLine sjl on wcst.JOBID = sjl.JOBID
+  join RetailConnSchedulerSubJobTable sjt on sjl.SUBJOBID = sjt.SUBJOBID
+  where sjt.AXTABLENAME = '''+@Tab+'''
+  order by rs.MODIFIEDDATETIME desc)'
+
+           Exec(@SQL)
+         
+           FETCH NEXT FROM T_cursor INTO @Tab
+      
+END
+select * from #changetrackingstatus order by Recordcount desc
+drop table #changetrackingstatus
+CLOSE T_cursor
+DEALLOCATE T_cursor
+¨'

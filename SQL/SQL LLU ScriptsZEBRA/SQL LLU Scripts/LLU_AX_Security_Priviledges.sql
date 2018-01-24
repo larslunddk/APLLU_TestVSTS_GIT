@@ -1,0 +1,16 @@
+-- ############## AX Priviledges overview
+select *, L.Text Label_Name, L2.Text Label_Descr
+from SECURITYTASK
+
+left outer join ModelElementLabel L on
+L.Module = SUBSTRING(SECURITYTASK.NAME, 2, 3)
+and L.LabelId = SUBSTRING(SECURITYTASK.NAME, 5, 7)
+and L.Language = 'en_us' -- Uncomment this line to filter by language
+
+left outer join ModelElementLabel L2 on
+L2.Module = SUBSTRING(SECURITYTASK.[DESCRIPTION], 2, 3)
+and L2.LabelId = SUBSTRING(SECURITYTASK.[DESCRIPTION], 5, 7)
+and L2.Language = 'en_us' -- Uncomment this line to filter by language
+
+where type = 0 -- 0=Priviledge, 1=Duty, 2=ProcessCycle
+and isnumeric(SUBSTRING(SECURITYTASK.NAME, 5, 7) ) = 1

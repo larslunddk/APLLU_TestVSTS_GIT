@@ -1,0 +1,7 @@
+declare @d datetime = GETDATE()
+select 'StartTime',@D
+WAITFOR DELAY '00:00:10' 
+select 'EndTime',GETDATE()
+SELECT 'Exec time', 
+       CONVERT(VARCHAR(8), GETDATE()-@D, 108) 'hh:mi:ss'
+

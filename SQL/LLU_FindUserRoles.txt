@@ -1,0 +1,4 @@
+select top 1000 user_, MSR.NAME,* from securityuserrole as SUR
+join [SUPPORT_AX2012_model].[dbo].[ModelSecurityRole] as MSR on 
+MSR.ROLEHANDLE = SUR.SECURITYROLE
+where user_ = 'alfapllu'

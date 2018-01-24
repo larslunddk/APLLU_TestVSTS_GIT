@@ -1,0 +1,1 @@
+restore database Ax30Sp2_IrisDemo from disk = 'd:\ax30sp2_irisdemo.bak' with replace, stats = 10
